@@ -1,0 +1,11 @@
+[Unit]
+Description=Linux Hello Authentication Daemon
+After=network.target
+
+[Service]
+ExecStartPre=/usr/lib/linux-hello/repair_venv.sh
+ExecStart=/usr/bin/linux-hello-daemon
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,5 @@
+#!/bin/sh
+USER="$PAM_USER"
+RESULT=$(echo "AUTH $USER" | socat - UNIX-CONNECT:/var/run/linux-hello.sock)
+
+[ "$RESULT" = "OK" ] && exit 0 || exit 1
