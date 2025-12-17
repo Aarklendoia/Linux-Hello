@@ -3,9 +3,13 @@ Description=Linux Hello Authentication Daemon
 After=network.target
 
 [Service]
-ExecStartPre=/usr/lib/linux-hello/repair_venv.sh
+User=linux-hello
+Group=linux-hello
 ExecStart=/usr/bin/linux-hello-daemon
 Restart=always
+RuntimeDirectory=linux-hello
+RuntimeDirectoryMode=755
+RuntimeDirectoryPreserve=yes
 
 [Install]
 WantedBy=multi-user.target

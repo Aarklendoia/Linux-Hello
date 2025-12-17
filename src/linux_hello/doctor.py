@@ -6,7 +6,7 @@ import stat
 import cv2
 
 VENV = "/opt/linux-hello/venv"
-SOCKET_PATH = "/var/run/linux-hello.sock"
+SOCKET_PATH = "/run/linux-hello/linux-hello.sock"
 FACES_DIR = "/var/lib/linux-hello/faces"
 
 def check(title, func):
@@ -40,8 +40,13 @@ def check_daemon_running():
         raise Exception("Daemon non actif")
 
 def check_socket():
-    if not os.path.exists(SOCKET_PATH):
-        raise Exception("Socket absent")
+    try:
+        s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        s.connect(SOCKET_PATH)
+        s.close()
+    except Exception:
+        raise Exception("Socket inaccessible")
+
     st = os.stat(SOCKET_PATH)
     if not stat.S_ISSOCK(st.st_mode):
         raise Exception("Le fichier existe mais n'est pas un socket")
