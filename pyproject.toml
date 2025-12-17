@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "linux-hello"
+version = "1.0.0"
+description = "Linux Hello – Authentification faciale locale"
+requires-python = ">=3.10"
+dependencies = [
+    "click",
+    "insightface",
+    "onnxruntime",
+    "numpy",
+]
+
+[project.scripts]
+hello = "linux_hello.cli:cli"
+linux-hello-daemon = "linux_hello.daemon:main"
