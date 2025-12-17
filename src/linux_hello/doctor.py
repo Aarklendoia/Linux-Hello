@@ -2,6 +2,7 @@ import os
 import subprocess
 import sys
 import socket
+import stat
 import cv2
 
 VENV = "/opt/linux-hello/venv"
@@ -41,7 +42,8 @@ def check_daemon_running():
 def check_socket():
     if not os.path.exists(SOCKET_PATH):
         raise Exception("Socket absent")
-    if not stat.S_ISSOCK(os.stat(SOCKET_PATH).st_mode):
+    st = os.stat(SOCKET_PATH)
+    if not stat.S_ISSOCK(st.st_mode):
         raise Exception("Le fichier existe mais n'est pas un socket")
 
 def check_camera():

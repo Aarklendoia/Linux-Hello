@@ -1,21 +1,22 @@
 #!/bin/bash
 set -e
 
-# Créer les dossiers de données
-mkdir -p /var/lib/linux-hello/faces
-chmod 777 /var/lib/linux-hello/faces
+case "$1" in
+    configure|triggered)
+        # Créer les dossiers de données
+        mkdir -p /var/lib/linux-hello/faces
+        chmod 777 /var/lib/linux-hello/faces
 
-# Réparer ou créer le venv
-/usr/lib/linux-hello/repair_venv.sh || true
+        # Réparer ou mettre à jour le venv
+        /usr/lib/linux-hello/repair_venv.sh || true
 
-# Modifier le shebang du daemon pour utiliser le venv
-sed -i '1c #!/opt/linux-hello/venv/bin/python3' /usr/bin/linux-hello-daemon
-chmod +x /usr/bin/linux-hello-daemon
+        # Modifier les shebangs pour utiliser le venv
+        sed -i '1c #!/opt/linux-hello/venv/bin/python3' /usr/bin/linux-hello-daemon
+        sed -i '1c #!/opt/linux-hello/venv/bin/python3' /usr/bin/hello
+        chmod +x /usr/bin/linux-hello-daemon /usr/bin/hello
 
-# Modifier le shebang de la CLI pour utiliser le venv
-sed -i '1c #!/opt/linux-hello/venv/bin/python3' /usr/bin/hello
-chmod +x /usr/bin/hello
-
-# Activer le service
-systemctl daemon-reload
-systemctl enable --now linux-hello.service
+        # Redémarrer le service
+        systemctl daemon-reload
+        systemctl restart linux-hello.service
+    ;;
+esac
