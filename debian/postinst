@@ -6,7 +6,9 @@ case "$1" in
 
         echo "[linux-hello] Configuration du paquet…"
 
+        #
         # 1. Créer l'utilisateur système linux-hello avec un vrai HOME
+        #
         if ! id linux-hello >/dev/null 2>&1; then
             adduser --system --group \
                 --home /var/lib/linux-hello \
@@ -14,29 +16,49 @@ case "$1" in
                 linux-hello
         fi
 
+        #
         # 2. Donner accès à la caméra
+        #
         adduser linux-hello video || true
 
-        # 3. Créer les dossiers InsightFace et Matplotlib
+        #
+        # 3. Créer l’arborescence du HOME
+        #
         mkdir -p /var/lib/linux-hello/.insightface
         mkdir -p /var/lib/linux-hello/.config/matplotlib
 
-        # 4. Créer les dossiers de visages
+        #
+        # 4. Créer le dossier des visages (lisible par l’utilisateur)
+        #
         mkdir -p /var/lib/linux-hello/faces
+        chown linux-hello:linux-hello /var/lib/linux-hello/faces
+        chmod 755 /var/lib/linux-hello/faces
 
-        # 5. Permissions strictes
+        #
+        # 5. Permissions du HOME (sans casser faces/)
+        #
         chown -R linux-hello:linux-hello /var/lib/linux-hello
-        chmod -R 750 /var/lib/linux-hello
+        chmod 755 /var/lib/linux-hello
+        chmod 750 /var/lib/linux-hello/.insightface
+        chmod 750 /var/lib/linux-hello/.config
+        chmod 750 /var/lib/linux-hello/.config/matplotlib
+        chmod 755 /var/lib/linux-hello/faces
 
+        #
         # 6. Réparer ou mettre à jour le venv
+        #
         /usr/lib/linux-hello/repair_venv.sh || true
 
+        #
         # 7. Modifier les shebangs pour utiliser le venv
+        #
         sed -i '1c #!/opt/linux-hello/venv/bin/python3' /usr/bin/linux-hello-daemon
         sed -i '1c #!/opt/linux-hello/venv/bin/python3' /usr/bin/hello
         chmod +x /usr/bin/linux-hello-daemon /usr/bin/hello
 
+        #
         # 8. Redémarrer le service
+        #
         systemctl daemon-reload
         systemctl restart linux-hello.service || true
     ;;
