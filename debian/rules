@@ -7,10 +7,19 @@ override_dh_auto_build:
 	true
 
 override_dh_auto_install:
+	# Générer le wheel
+	python3 -m pip wheel . --no-deps -w /tmp/linux-hello-build
+	
+	# Copier le wheel dans le répertoire du paquet
+	mkdir -p debian/linux-hello/usr/share/linux-hello
+	cp /tmp/linux-hello-build/linux_hello-*.whl debian/linux-hello/usr/share/linux-hello/
+	
+	# Installer la CLI et les scripts dans /usr/bin
 	pip install . \
 	    --root=$(CURDIR)/debian/linux-hello \
 	    --prefix=/usr \
 	    --no-deps \
+		--ignore-installed \
 	    --no-warn-script-location
 
 	# Déplacer les scripts installés dans /usr/local/bin vers /usr/bin
@@ -19,14 +28,3 @@ override_dh_auto_install:
 	    mv debian/linux-hello/usr/local/bin/* debian/linux-hello/usr/bin/; \
 	    rm -rf debian/linux-hello/usr/local; \
 	fi
-
-	# Copier le wheel généré dans /usr/share/linux-hello/
-	mkdir -p debian/linux-hello/usr/share/linux-hello
-
-	# Trouver le wheel généré par pip
-	WHEEL=$$(find $(HOME)/.cache/pip/wheels -type f -name "linux_hello-*.whl" -o -name "linux-hello-*.whl" | head -n 1); \
-	if [ -z "$$WHEEL" ]; then \
-	    echo "ERREUR: wheel linux_hello introuvable"; \
-	    exit 1; \
-	fi; \
-	cp "$$WHEEL" debian/linux-hello/usr/share/linux-hello/

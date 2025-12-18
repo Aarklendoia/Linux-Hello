@@ -1,0 +1,2 @@
+#!/usr/bin/python3
+exec /opt/linux-hello/venv/bin/python3 -m linux_hello.daemon

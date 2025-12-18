@@ -7,6 +7,10 @@ Standards-Version: 4.6.0
 
 Package: linux-hello
 Architecture: all
-Depends: ${misc:Depends}, ${python3:Depends}, python3-opencv, python3-numpy, python3-onnxruntime, python3-pip
+Depends: ${misc:Depends},
+         ${python3:Depends},
+         python3-opencv,
+         python3-numpy,
+         python3-onnxruntime | python3-onnxruntime-cpu | python3-pip
 Description: Linux Hello – Authentification faciale locale
  A modern, offline facial authentication system for Linux using InsightFace.

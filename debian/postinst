@@ -1,21 +1,40 @@
 #!/bin/bash
 set -e
 
-# Créer les dossiers de données
+VENV="/opt/linux-hello/venv"
+PYTHON="/usr/bin/python3"
+
+echo "[linux-hello] Configuration du paquet…"
+
+# 1. Créer les dossiers de données
 mkdir -p /var/lib/linux-hello/faces
 chmod 777 /var/lib/linux-hello/faces
 
-# Réparer ou créer le venv
+# 2. Créer ou réparer le venv
+echo "[linux-hello] Vérification du venv…"
 /usr/lib/linux-hello/repair_venv.sh || true
 
-# Modifier le shebang du daemon pour utiliser le venv
+# 3. Installer onnxruntime si absent
+if ! "$VENV/bin/python3" -c "import onnxruntime" 2>/dev/null; then
+    echo "[linux-hello] Installation de onnxruntime via pip…"
+    "$VENV/bin/pip" install onnxruntime
+fi
+
+# 4. Modifier le shebang du daemon pour utiliser le venv
 sed -i '1c #!/opt/linux-hello/venv/bin/python3' /usr/bin/linux-hello-daemon
 chmod +x /usr/bin/linux-hello-daemon
 
-# Modifier le shebang de la CLI pour utiliser le venv
+# 5. Modifier le shebang de la CLI pour utiliser le venv
 sed -i '1c #!/opt/linux-hello/venv/bin/python3' /usr/bin/hello
 chmod +x /usr/bin/hello
 
-# Activer le service
-systemctl daemon-reload
-systemctl enable --now linux-hello.service
+# 6. Activer le service systemd si disponible
+if command -v systemctl >/dev/null 2>&1; then
+    echo "[linux-hello] Activation du service systemd…"
+    systemctl daemon-reload || true
+    systemctl enable --now linux-hello.service || true
+else
+    echo "[linux-hello] systemd non disponible (WSL2 ?), service non activé."
+fi
+
+echo "[linux-hello] Installation terminée."
