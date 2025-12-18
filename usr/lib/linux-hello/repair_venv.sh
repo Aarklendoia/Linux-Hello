@@ -15,15 +15,15 @@ fi
 
 # Installer / réinstaller les dépendances Python
 echo "[linux-hello] Installation des dépendances…"
-"$VENV/bin/pip" install --upgrade pip
-"$VENV/bin/pip" install insightface opencv-python matplotlib numpy click psutil rich
+"$VENV/bin/pip" install --upgrade --break-system-packages pip
+"$VENV/bin/pip" install --break-system-packages insightface opencv-python matplotlib numpy click psutil rich
 
 # Installer le paquet linux_hello depuis le wheel
 echo "[linux-hello] Installation du paquet linux_hello…"
 if [ -f "$WHEEL_DIR"/linux_hello-*.whl ]; then
     WHEEL=$(ls "$WHEEL_DIR"/linux_hello-*.whl | head -n 1)
     echo "[linux-hello] Utilisation du wheel: $WHEEL"
-    "$VENV/bin/pip" install --force-reinstall "$WHEEL"
+    "$VENV/bin/pip" install --break-system-packages --force-reinstall "$WHEEL"
 else
     echo "[linux-hello] ERREUR: wheel linux_hello introuvable dans $WHEEL_DIR"
     exit 1
