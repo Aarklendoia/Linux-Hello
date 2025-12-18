@@ -28,9 +28,11 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y \
             build-essential \
-            debhelper-compat \
+            debhelper \
+            dh-python \
             python3-setuptools \
             python3-setuptools-scm \
+            python3-distutils \
             gettext
       
       - name: Build Debian package
