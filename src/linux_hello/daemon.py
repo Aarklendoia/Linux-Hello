@@ -3,10 +3,10 @@ import os
 import cv2
 import numpy as np
 import insightface
+import getpass
 
 
 SOCKET_PATH = "/var/run/linux-hello.sock"
-FACE_DIR = "/var/lib/linux-hello/faces"
 DEVICE = "/dev/video0"
 
 def cosine_similarity(a, b):
@@ -21,7 +21,10 @@ class HelloDaemon:
         self.model.prepare(ctx_id=0)
 
     def authenticate(self, username):
-        path = os.path.join(FACE_DIR, f"{username}.npy")
+        user = getpass.getuser()
+        faces_dir = f"/var/lib/linux-hello/faces/{user}"
+
+        path = os.path.join(faces_dir, f"{username}.npy")
         if not os.path.exists(path):
             return "NO_FACE"
 

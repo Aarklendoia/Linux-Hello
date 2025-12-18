@@ -8,6 +8,7 @@ import numpy as np
 
 from .doctor import main as doctor_main
 from .select_camera import select_camera as select_camera_fn
+from .enroll import enroll as enroll_fn
 
 FACE_DIR = "/var/lib/linux-hello/faces"
 DEVICE = "/dev/video0"
@@ -100,6 +101,11 @@ def doctor():
 def select_camera():
     """Sélectionner la caméra utilisée pour la reconnaissance."""
     select_camera_fn()
+
+@cli.command()
+def enroll():
+    """Enregistrer votre visage pour l'authentification."""
+    enroll_fn()
 
 def main():
     cli()

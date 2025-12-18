@@ -8,7 +8,7 @@ echo "[linux-hello] Configuration du paquet…"
 
 # 1. Créer les dossiers de données
 mkdir -p /var/lib/linux-hello/faces
-chmod 777 /var/lib/linux-hello/faces
+chmod 700 /var/lib/linux-hello/faces
 
 # 2. Créer ou réparer le venv
 echo "[linux-hello] Vérification du venv…"
