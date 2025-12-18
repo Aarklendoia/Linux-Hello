@@ -23,7 +23,7 @@ echo "[linux-hello] Installation du paquet linux_hello…"
 if [ -f "$WHEEL_DIR"/linux_hello-*.whl ]; then
     WHEEL=$(ls "$WHEEL_DIR"/linux_hello-*.whl | head -n 1)
     echo "[linux-hello] Utilisation du wheel: $WHEEL"
-    "$VENV/bin/pip" install --upgrade "$WHEEL"
+    "$VENV/bin/pip" install --force-reinstall "$WHEEL"
 else
     echo "[linux-hello] ERREUR: wheel linux_hello introuvable dans $WHEEL_DIR"
     exit 1

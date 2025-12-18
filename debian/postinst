@@ -37,4 +37,12 @@ else
     echo "[linux-hello] systemd non disponible (WSL2 ?), service non activé."
 fi
 
+# 7. Lancer la configuration de la caméra si terminal interactif
+if [ -t 1 ]; then
+    echo "[linux-hello] Configuration initiale : sélection de la caméra…"
+    /usr/bin/hello select-camera || true
+else
+    echo "[linux-hello] Mode non interactif : configuration de la caméra ignorée."
+fi
+
 echo "[linux-hello] Installation terminée."

@@ -7,6 +7,7 @@ import insightface
 import numpy as np
 
 from .doctor import main as doctor_main
+from .select_camera import select_camera as select_camera_fn
 
 FACE_DIR = "/var/lib/linux-hello/faces"
 DEVICE = "/dev/video0"
@@ -94,6 +95,11 @@ def remove(username):
 def doctor():
     """Diagnostique l'installation Linux Hello."""
     doctor_main()
+
+@cli.command()
+def select_camera():
+    """Sélectionner la caméra utilisée pour la reconnaissance."""
+    select_camera_fn()
 
 def main():
     cli()
