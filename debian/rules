@@ -55,3 +55,11 @@ override_dh_auto_install:
 	    mv debian/linux-hello/usr/local/bin/* debian/linux-hello/usr/bin/; \
 	    rm -rf debian/linux-hello/usr/local; \
 	fi
+	
+	# Installer les pages man multilingues depuis debian/man/
+	for lang in en fr de es it pt ru ja zh_CN ar; do \
+		mkdir -p debian/linux-hello/usr/share/man/$${lang}/man1 debian/linux-hello/usr/share/man/$${lang}/man8; \
+		[ -f debian/man/$${lang}/linux-hello.1 ] && cp debian/man/$${lang}/linux-hello.1 debian/linux-hello/usr/share/man/$${lang}/man1/ || true; \
+		[ -f debian/man/$${lang}/linux-hello-daemon.8 ] && cp debian/man/$${lang}/linux-hello-daemon.8 debian/linux-hello/usr/share/man/$${lang}/man8/ || true; \
+		[ -f debian/man/$${lang}/pam_linux_hello.8 ] && cp debian/man/$${lang}/pam_linux_hello.8 debian/linux-hello/usr/share/man/$${lang}/man8/ || true; \
+	done

@@ -1,0 +1,156 @@
+.TH LINUX-HELLO 1 "18 December 2025" "linux-hello 1.0.0" "User Commands"
+.SH NAME
+hello \- Linux facial authentication system with PAM integration
+.SH SYNOPSIS
+.B hello
+.I COMMAND
+.RI [ OPTIONS ]
+.SH DESCRIPTION
+.B hello
+is a facial authentication system for Linux that integrates with PAM for secure
+login and system access. It uses InsightFace deep learning model for face recognition
+and supports multiple languages.
+.SH COMMANDS
+.TP
+.B add USER
+Register a new user face. The system will capture the face image from the camera
+and store the facial embedding.
+.TP
+.B test USER
+Test authentication for a specific user. The system will attempt to recognize
+the user's face from the camera.
+.TP
+.B list
+List all registered users with their enrollment status.
+.TP
+.B remove USER
+Unregister a user and delete their stored facial data.
+.TP
+.B doctor
+Run system diagnostics to verify installation integrity. Checks:
+.RS
+.IP \- 2
+Virtual environment presence
+.IP \-
+Python installation
+.IP \-
+InsightFace importability
+.IP \-
+Daemon service status
+.IP \-
+Unix socket connectivity
+.IP \-
+Camera accessibility
+.IP \-
+Registered faces database
+.RE
+.TP
+.B select-camera
+Interactive camera selection tool. Lists available cameras and allows
+configuration of the default camera for authentication.
+.TP
+.B enroll USER
+Alias for
+.B add USER
+. Register a new user face.
+.SH OPTIONS
+.TP
+.B \-h, \-\-help
+Show help message and exit.
+.TP
+.B \-v, \-\-version
+Show program version.
+.SH INTERNATIONALIZATION
+The system supports multiple languages through environment variables:
+.TP
+English
+.B LANG=en_US.UTF-8 hello doctor
+.TP
+Français
+.B LANG=fr_FR.UTF-8 hello doctor
+.TP
+Español
+.B LANG=es_ES.UTF-8 hello doctor
+.TP
+Deutsch
+.B LANG=de_DE.UTF-8 hello doctor
+.TP
+Italiano
+.B LANG=it_IT.UTF-8 hello doctor
+.TP
+Português
+.B LANG=pt_BR.UTF-8 hello doctor
+.TP
+Русский
+.B LANG=ru_RU.UTF-8 hello doctor
+.TP
+日本語
+.B LANG=ja_JP.UTF-8 hello doctor
+.TP
+中文
+.B LANG=zh_CN.UTF-8 hello doctor
+.TP
+العربية
+.B LANG=ar_AR.UTF-8 hello doctor
+.SH EXAMPLES
+.TP
+Register a new user:
+.B hello add john
+.TP
+Test authentication:
+.B hello test john
+.TP
+List all users:
+.B hello list
+.TP
+Run system diagnostics:
+.B hello doctor
+.TP
+Select camera:
+.B hello select-camera
+.TP
+Remove user:
+.B hello remove john
+.SH DAEMON
+The system runs a background daemon service accessible via:
+.B systemctl status linux-hello
+.PP
+Start the daemon:
+.B sudo systemctl start linux-hello
+.PP
+Enable on boot:
+.B sudo systemctl enable linux-hello
+.PP
+View logs:
+.B journalctl -u linux-hello -f
+.SH PAM INTEGRATION
+To enable facial authentication for login, add to
+.I /etc/pam.d/login
+or
+.I /etc/pam.d/sudo
+:
+.PP
+.RS
+auth    sufficient    pam_exec.so quiet stdout /usr/lib/linux-hello/pam_linux_hello.py
+.RE
+.PP
+This will attempt facial authentication before falling back to password.
+.SH CONFIGURATION
+Configuration files are stored in:
+.B /etc/linux-hello/
+.PP
+User face data is stored in:
+.B /var/lib/linux-hello/faces/
+.PP
+System logs are available via journalctl:
+.B journalctl -u linux-hello
+.SH SEE ALSO
+.BR systemctl (1),
+.BR journalctl (1),
+.BR pam (8)
+.SH AUTHOR
+Linux Hello Development Team
+.SH BUGS
+Report bugs to the project repository.
+.SH LICENSE
+GNU General Public License v3.0 or later

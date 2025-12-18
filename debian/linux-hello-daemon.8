@@ -1,0 +1,147 @@
+.TH LINUX-HELLO-DAEMON 8 "18 December 2025" "linux-hello 1.0.0" "System Administration"
+.SH NAME
+linux-hello-daemon \- Linux facial authentication system background service
+.SH SYNOPSIS
+.B linux-hello-daemon
+.RI [ OPTIONS ]
+.SH DESCRIPTION
+.B linux-hello-daemon
+is the background service component of the Linux Hello facial authentication system.
+It runs as a systemd service and manages face recognition requests, maintains the Unix socket
+for IPC (Inter-Process Communication), and handles daemon operations.
+.PP
+The daemon:
+.RS
+.IP \- 2
+Listens on Unix socket `/run/linux-hello.sock` for authentication requests
+.IP \-
+Manages face embeddings and recognition operations
+.IP \-
+Coordinates with PAM authentication modules
+.IP \-
+Provides system-wide facial recognition services
+.IP \-
+Logs operations to systemd journal
+.RE
+.SH OPTIONS
+.TP
+.B \-h, \-\-help
+Show help message and exit.
+.TP
+.B \-v, \-\-version
+Show program version and exit.
+.SH SYSTEMD INTEGRATION
+The daemon is managed by systemd and can be controlled via:
+.TP
+Start the daemon:
+.B sudo systemctl start linux-hello
+.TP
+Stop the daemon:
+.B sudo systemctl stop linux-hello
+.TP
+Restart the daemon:
+.B sudo systemctl restart linux-hello
+.TP
+Enable on boot:
+.B sudo systemctl enable linux-hello
+.TP
+Disable from boot:
+.B sudo systemctl disable linux-hello
+.TP
+Check status:
+.B systemctl status linux-hello
+.TP
+View service logs:
+.B journalctl -u linux-hello -f
+.SH SOCKET
+The daemon communicates via Unix domain socket:
+.B /run/linux-hello.sock
+.PP
+This socket is used for IPC between:
+.RS
+.IP \- 2
+CLI interface (`hello` command)
+.IP \-
+PAM authentication module
+.IP \-
+System authentication framework
+.RE
+.PP
+Socket permissions:
+.B 0666 (rw-rw-rw-)
+allowing all users to connect for authentication requests.
+.SH CONFIGURATION
+The daemon reads configuration from:
+.B /etc/linux-hello/config.json
+.PP
+Configuration includes:
+.RS
+.IP \- 2
+Default camera selection
+.IP \-
+Recognition thresholds
+.IP \-
+Logging settings
+.RE
+.SH DATABASE
+Face embeddings are stored in:
+.B /var/lib/linux-hello/faces/
+.PP
+Data structure:
+.RS
+.IP \- 2
+`USERNAME/embedding.npy` - Face embedding vectors (NumPy format)
+.IP \-
+`USERNAME/metadata.json` - User metadata and registration info
+.RE
+.PP
+Directory permissions:
+.B 0700 (rwx------)
+restricting access to root only.
+.SH LOGGING
+All daemon operations are logged to systemd journal:
+.PP
+View all logs:
+.B journalctl -u linux-hello
+.PP
+View recent logs in real-time:
+.B journalctl -u linux-hello -f
+.PP
+Filter by priority:
+.B journalctl -u linux-hello -p err
+.PP
+View logs for a time range:
+.B journalctl -u linux-hello --since "1 hour ago"
+.SH SIGNALS
+The daemon responds to standard signals:
+.TP
+.B SIGTERM
+Graceful shutdown
+.TP
+.B SIGINT
+Immediate shutdown
+.TP
+.B SIGHUP
+Reload configuration (not implemented)
+.SH EXIT STATUS
+.TP
+.B 0
+Successful operation
+.TP
+.B 1
+General error
+.TP
+.B 2
+Initialization error (socket, config, etc.)
+.SH SEE ALSO
+.BR hello (1),
+.BR pam_linux_hello (8),
+.BR systemctl (1),
+.BR journalctl (1),
+.BR unix (7)
+.SH AUTHOR
+Linux Hello Development Team
+.SH BUGS
+Report bugs to the project repository.
+.SH LICENSE
+GNU General Public License v3.0 or later

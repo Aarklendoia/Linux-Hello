@@ -1,0 +1,171 @@
+.TH PAM_LINUX_HELLO 8 "18 December 2025" "linux-hello 1.0.0" "System Administration"
+.SH NAME
+pam_linux_hello \- PAM module for facial authentication
+.SH SYNOPSIS
+.B auth    sufficient    pam_exec.so quiet stdout /usr/lib/linux-hello/pam_linux_hello.py [options]
+.SH DESCRIPTION
+.B pam_linux_hello
+is a PAM (Pluggable Authentication Module) that enables facial recognition for system
+authentication. It can be used for login, sudo, and other system authentication services.
+.PP
+The module attempts to recognize the user's face via the Linux Hello daemon.
+If successful (sufficient control flag), it allows authentication without requiring a password.
+If unsuccessful, authentication falls back to the next PAM module (typically password).
+.SH MODULE OPTIONS
+The PAM module accepts the following options:
+.TP
+.B debug
+Enable debug logging to system journal (verbose output)
+.TP
+.B timeout=SECONDS
+Set timeout for face recognition (default: 5 seconds)
+.TP
+.B max_attempts=N
+Maximum recognition attempts before failing (default: 3)
+.SH CONTROL FLAGS
+The module uses the `sufficient` control flag:
+.TP
+.B sufficient
+If the module succeeds, the user is authenticated without checking further modules.
+If the module fails, subsequent modules are checked (password fallback).
+.PP
+This is the recommended configuration for face-based authentication with password fallback.
+.SH CONFIGURATION
+.SS Enable for Login
+Edit `/etc/pam.d/login`:
+.PP
+.RS
+auth    sufficient    pam_exec.so quiet stdout /usr/lib/linux-hello/pam_linux_hello.py
+auth    required      pam_unix.so nullok try_first_pass
+.RE
+.SS Enable for Sudo
+Edit `/etc/pam.d/sudo`:
+.PP
+.RS
+auth    sufficient    pam_exec.so quiet stdout /usr/lib/linux-hello/pam_linux_hello.py
+auth    include       common-auth
+.RE
+.SS Enable for GDM/LightDM
+Edit `/etc/pam.d/gdm-password` or `/etc/pam.d/lightdm`:
+.PP
+.RS
+auth    sufficient    pam_exec.so quiet stdout /usr/lib/linux-hello/pam_linux_hello.py
+auth    required      pam_unix.so try_first_pass nullok
+.RE
+.SH OPERATION
+When invoked:
+.TP
+1. Module connects to Linux Hello daemon via Unix socket `/run/linux-hello.sock`
+.TP
+2. Passes PAM_USER (username) to the daemon
+.TP
+3. Daemon attempts face recognition via camera
+.TP
+4. Recognition result is returned (success/failure with similarity score)
+.TP
+5. Module passes/fails authentication accordingly
+.SH RETURN VALUES
+.TP
+.B PAM_SUCCESS
+Face recognized successfully (similarity above threshold)
+.TP
+.B PAM_AUTH_ERR
+Face not recognized or authentication failed
+.TP
+.B PAM_SYSTEM_ERR
+System error (socket, daemon unavailable, etc.)
+.TP
+.B PAM_USER_UNKNOWN
+User not found in face database
+.TP
+.B PAM_SERVICE_ERR
+Service error (timeout, camera unavailable, etc.)
+.SH LOGGING
+All authentication attempts are logged to systemd journal:
+.PP
+View PAM authentication logs:
+.B journalctl -u systemd-logind -f
+.PP
+View PAM module logs:
+.B journalctl SYSLOG_IDENTIFIER=pam_linux_hello
+.PP
+Enable debug logging in PAM config:
+.B pam_exec.so quiet stdout /usr/lib/linux-hello/pam_linux_hello.py debug
+.SH TROUBLESHOOTING
+.TP
+"Socket missing"
+.B sudo systemctl start linux-hello
+.TP
+"User not found"
+Register the user: `sudo hello add USERNAME`
+.TP
+"Camera inaccessible"
+Check camera permissions: `sudo usermod -aG video $USER`
+.TP
+"Timeout"
+Increase timeout parameter: `timeout=10`
+.TP
+"Face not recognized"
+Re-register the user with better lighting: `sudo hello add USERNAME`
+.SH SECURITY
+.TP
+Socket Protection
+The socket `/run/linux-hello.sock` has permissions 0666 allowing any user
+to attempt authentication. Only valid registered users will be recognized.
+.TP
+Face Database
+Face embeddings are stored in `/var/lib/linux-hello/faces/` with restrictive
+permissions (0700) accessible only to root.
+.TP
+PAM Integration
+The module runs as root via `pam_exec.so`, allowing access to the daemon socket.
+.TP
+Fallback Mechanism
+Authentication always falls back to password entry if face recognition fails,
+ensuring system access even with hardware issues.
+.SH EXAMPLES
+.TP
+Enable for sudo with debug:
+.B auth    sufficient    pam_exec.so quiet stdout /usr/lib/linux-hello/pam_linux_hello.py debug
+.TP
+Enable with custom timeout:
+.B auth    sufficient    pam_exec.so quiet stdout /usr/lib/linux-hello/pam_linux_hello.py timeout=10
+.TP
+Enable with multiple attempts:
+.B auth    sufficient    pam_exec.so quiet stdout /usr/lib/linux-hello/pam_linux_hello.py max_attempts=5
+.SH FILES
+.TP
+.B /usr/lib/linux-hello/pam_linux_hello.py
+The PAM module executable
+.TP
+.B /run/linux-hello.sock
+Unix socket for daemon communication
+.TP
+.B /var/lib/linux-hello/faces/
+Face embeddings database
+.TP
+.B /etc/linux-hello/config.json
+System configuration
+.SH DEPENDENCIES
+.TP
+.B linux-hello-daemon
+The daemon must be running for face authentication to work
+.TP
+.B libpam0g
+PAM library (usually pre-installed)
+.TP
+.B pam-exec
+The `pam_exec.so` module for executing custom programs
+.SH SEE ALSO
+.BR hello (1),
+.BR linux-hello-daemon (8),
+.BR pam (8),
+.BR pam_exec (8),
+.BR systemctl (1),
+.BR journalctl (1)
+.SH AUTHOR
+Linux Hello Development Team
+.SH BUGS
+Report bugs to the project repository.
+.SH LICENSE
+GNU General Public License v3.0 or later
