@@ -8,15 +8,31 @@ override_dh_auto_build:
 
 override_dh_auto_install:
 	# Compiler les traductions
-	for lang in fr en; do \
+	for lang in fr en es de it pt ru ja zh_CN ar; do \
 		msgfmt po/$$lang.po -o po/$$lang.mo; \
 	done
 	
 	# Installer les fichiers de traduction
 	mkdir -p debian/linux-hello/usr/share/locale/fr/LC_MESSAGES
 	mkdir -p debian/linux-hello/usr/share/locale/en/LC_MESSAGES
+	mkdir -p debian/linux-hello/usr/share/locale/es/LC_MESSAGES
+	mkdir -p debian/linux-hello/usr/share/locale/de/LC_MESSAGES
+	mkdir -p debian/linux-hello/usr/share/locale/it/LC_MESSAGES
+	mkdir -p debian/linux-hello/usr/share/locale/pt/LC_MESSAGES
+	mkdir -p debian/linux-hello/usr/share/locale/ru/LC_MESSAGES
+	mkdir -p debian/linux-hello/usr/share/locale/ja/LC_MESSAGES
+	mkdir -p debian/linux-hello/usr/share/locale/zh_CN/LC_MESSAGES
+	mkdir -p debian/linux-hello/usr/share/locale/ar/LC_MESSAGES
 	cp po/fr.mo debian/linux-hello/usr/share/locale/fr/LC_MESSAGES/linux-hello.mo
 	cp po/en.mo debian/linux-hello/usr/share/locale/en/LC_MESSAGES/linux-hello.mo
+	cp po/es.mo debian/linux-hello/usr/share/locale/es/LC_MESSAGES/linux-hello.mo
+	cp po/de.mo debian/linux-hello/usr/share/locale/de/LC_MESSAGES/linux-hello.mo
+	cp po/it.mo debian/linux-hello/usr/share/locale/it/LC_MESSAGES/linux-hello.mo
+	cp po/pt.mo debian/linux-hello/usr/share/locale/pt/LC_MESSAGES/linux-hello.mo
+	cp po/ru.mo debian/linux-hello/usr/share/locale/ru/LC_MESSAGES/linux-hello.mo
+	cp po/ja.mo debian/linux-hello/usr/share/locale/ja/LC_MESSAGES/linux-hello.mo
+	cp po/zh_CN.mo debian/linux-hello/usr/share/locale/zh_CN/LC_MESSAGES/linux-hello.mo
+	cp po/ar.mo debian/linux-hello/usr/share/locale/ar/LC_MESSAGES/linux-hello.mo
 
 	# Générer le wheel
 	python3 -m pip wheel . --no-deps -w /tmp/linux-hello-build

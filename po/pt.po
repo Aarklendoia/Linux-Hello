@@ -1,0 +1,117 @@
+# Traductions pour Linux Hello - pt
+# Copyright (C) 2025
+# This file is distributed under the same license as the linux-hello package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: linux-hello 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-12-18 14:57+0100\n"
+"PO-Revision-Date: 2025-12-18 15:00+0100\n"
+"Last-Translator: Auto-generated\n"
+"Language-Team: pt\n"
+"Language: pt\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "No face detected"
+msgstr "Nenhum rosto detectado"
+
+msgid "✅ Embedding saved for %s"
+msgstr "✅ Incorporação salva para %s"
+
+msgid "No embedding registered"
+msgstr "Nenhuma incorporação registrada"
+
+msgid "Similarity: %.3f"
+msgstr "Similaridade: %.3f"
+
+msgid "✅ Recognized"
+msgstr "✅ Reconhecido"
+
+msgid "❌ Not recognized"
+msgstr "❌ Não reconhecido"
+
+msgid "✅ Deleted: %s"
+msgstr "✅ Deletado: %s"
+
+msgid "User not found"
+msgstr "Usuário não encontrado"
+
+msgid "OK"
+msgstr "OK"
+
+msgid "FAIL"
+msgstr "ERRO"
+
+msgid "Venv missing"
+msgstr "Venv ausente"
+
+msgid "python3 missing from venv"
+msgstr "python3 ausente do venv"
+
+msgid "InsightFace not importable"
+msgstr "InsightFace não importável"
+
+msgid "Daemon not active"
+msgstr "Daemon não ativo"
+
+msgid "Socket missing"
+msgstr "Socket ausente"
+
+msgid "File exists but is not a socket"
+msgstr "File exists but is not a socket"
+
+msgid "Camera inaccessible"
+msgstr "Câmera inacessível"
+
+msgid "Faces directory missing"
+msgstr "Faces directory missing"
+
+msgid "No registered faces"
+msgstr "Nenhum rosto registrado"
+
+msgid "=== Linux Hello Doctor ==="
+msgstr "=== Linux Hello Doctor ==="
+
+msgid "Venv present"
+msgstr "Venv present"
+
+msgid "Python in venv present"
+msgstr "Python in venv present"
+
+msgid "InsightFace importable"
+msgstr "InsightFace importable"
+
+msgid "Daemon active"
+msgstr "Daemon active"
+
+msgid "Unix socket present"
+msgstr "Unix socket present"
+
+msgid "Camera accessible"
+msgstr "Camera accessible"
+
+msgid "Registered faces"
+msgstr "Registered faces"
+
+msgid "Testing camera %d…"
+msgstr "Testing camera %d…"
+
+msgid "Look at the LED or preview. Press Enter to continue."
+msgstr "Look at the LED or preview. Press Enter to continue."
+
+msgid "Use camera %d? (y/N) "
+msgstr "Use camera %d? (y/N) "
+
+msgid "✅ Camera %d saved."
+msgstr "✅ Camera %d saved."
+
+msgid "No camera detected."
+msgstr "No camera detected."
+
+msgid "No camera selected."
+msgstr "No camera selected."
+
