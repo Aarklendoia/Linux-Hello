@@ -48,6 +48,9 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 
+# setuptools_scm version file
+src/linux_hello/_version.py
+
 # Translations
 *.mo
 *.pot
