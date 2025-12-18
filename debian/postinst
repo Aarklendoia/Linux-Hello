@@ -4,7 +4,11 @@ set -e
 VENV="/opt/linux-hello/venv"
 PYTHON="/usr/bin/python3"
 
-echo "[linux-hello] Configuration du paquet…"
+. /usr/share/debconf/confmodule
+export TEXTDOMAIN=linux-hello
+export TEXTDOMAINDIR=/usr/share/locale
+
+echo "$(gettext "[linux-hello] Configuration du paquet…")"
 
 # 1. Créer les dossiers de données
 mkdir -p /var/lib/linux-hello/faces

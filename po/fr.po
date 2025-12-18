@@ -1,0 +1,156 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-12-18 14:57+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/linux_hello/cli.py:41 src/linux_hello/cli.py:69
+msgid "No face detected"
+msgstr "Aucun visage détecté"
+
+#: src/linux_hello/cli.py:48
+#, python-format
+msgid "✅ Embedding saved for %s"
+msgstr "✅ Embedding enregistré pour %s"
+
+#: src/linux_hello/cli.py:57
+msgid "No embedding registered"
+msgstr "Aucun embedding enregistré"
+
+#: src/linux_hello/cli.py:75
+#, python-format
+msgid "Similarity: %.3f"
+msgstr "Similarité : %.3f"
+
+#: src/linux_hello/cli.py:76
+msgid "✅ Recognized"
+msgstr "✅ Reconnu"
+
+#: src/linux_hello/cli.py:76
+msgid "❌ Not recognized"
+msgstr "❌ Non reconnu"
+
+#: src/linux_hello/cli.py:92
+#, python-format
+msgid "✅ Deleted: %s"
+msgstr "✅ Supprimé : %s"
+
+#: src/linux_hello/cli.py:94
+msgid "User not found"
+msgstr "Utilisateur introuvable"
+
+#: src/linux_hello/doctor.py:18
+msgid "OK"
+msgstr "OK"
+
+#: src/linux_hello/doctor.py:20
+msgid "FAIL"
+msgstr "ERREUR"
+
+#: src/linux_hello/doctor.py:25
+msgid "Venv missing"
+msgstr "Venv absent"
+
+#: src/linux_hello/doctor.py:30
+msgid "python3 missing from venv"
+msgstr "python3 manquant dans le venv"
+
+#: src/linux_hello/doctor.py:37
+msgid "InsightFace not importable"
+msgstr "InsightFace non importable"
+
+#: src/linux_hello/doctor.py:42
+msgid "Daemon not active"
+msgstr "Daemon non actif"
+
+#: src/linux_hello/doctor.py:46
+msgid "Socket missing"
+msgstr "Socket absent"
+
+#: src/linux_hello/doctor.py:48
+msgid "File exists but is not a socket"
+msgstr "Le fichier existe mais n'est pas un socket"
+
+#: src/linux_hello/doctor.py:53
+msgid "Camera inaccessible"
+msgstr "Caméra inaccessible"
+
+#: src/linux_hello/doctor.py:58
+msgid "Faces directory missing"
+msgstr "Dossier faces absent"
+
+#: src/linux_hello/doctor.py:60
+msgid "No registered faces"
+msgstr "Aucun visage enregistré"
+
+#: src/linux_hello/doctor.py:63
+msgid "=== Linux Hello Doctor ==="
+msgstr "=== Linux Hello Doctor ==="
+
+#: src/linux_hello/doctor.py:65
+msgid "Venv present"
+msgstr "Venv présent"
+
+#: src/linux_hello/doctor.py:66
+msgid "Python in venv present"
+msgstr "Python du venv présent"
+
+#: src/linux_hello/doctor.py:67
+msgid "InsightFace importable"
+msgstr "InsightFace importable"
+
+#: src/linux_hello/doctor.py:68
+msgid "Daemon active"
+msgstr "Daemon actif"
+
+#: src/linux_hello/doctor.py:69
+msgid "Unix socket present"
+msgstr "Socket Unix présent"
+
+#: src/linux_hello/doctor.py:70
+msgid "Camera accessible"
+msgstr "Caméra accessible"
+
+#: src/linux_hello/doctor.py:71
+msgid "Registered faces"
+msgstr "Visages enregistrés"
+
+#: src/linux_hello/select_camera.py:23
+#, python-format
+msgid "Testing camera %d…"
+msgstr "Test de la caméra %d…"
+
+#: src/linux_hello/select_camera.py:24
+msgid "Look at the LED or preview. Press Enter to continue."
+msgstr "Regardez la LED ou l'aperçu. Appuyez sur Entrée pour continuer."
+
+#: src/linux_hello/select_camera.py:37
+#, python-format
+msgid "Use camera %d? (y/N) "
+msgstr "Voulez-vous utiliser la caméra %d ? (o/N) "
+
+#: src/linux_hello/select_camera.py:51
+#, python-format
+msgid "✅ Camera %d saved."
+msgstr "✅ Caméra %d enregistrée."
+
+#: src/linux_hello/select_camera.py:56
+msgid "No camera detected."
+msgstr "Aucune caméra détectée."
+
+#: src/linux_hello/select_camera.py:64
+msgid "No camera selected."
+msgstr "Aucune caméra sélectionnée."

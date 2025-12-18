@@ -2,6 +2,8 @@ import cv2
 import json
 import os
 
+from .i18n import _
+
 CONFIG_PATH = "/etc/linux-hello/config.json"
 
 def list_cameras(max_test=10):
@@ -18,22 +20,22 @@ def test_camera(index):
     if not cap.isOpened():
         return False
 
-    print(f"Test de la caméra {index}…")
-    print("Regardez la LED ou l’aperçu. Appuyez sur Entrée pour continuer.")
+    print(_("Testing camera %d…") % index)
+    print(_("Look at the LED or preview. Press Enter to continue."))
 
     while True:
         ret, frame = cap.read()
         if not ret:
             break
-        cv2.imshow(f"Caméra {index}", frame)
-        if cv2.waitKey(1) == 13:  # Entrée
+        cv2.imshow(f"Camera {index}", frame)
+        if cv2.waitKey(1) == 13:
             break
 
     cap.release()
     cv2.destroyAllWindows()
 
-    confirm = input(f"Voulez-vous utiliser la caméra {index} ? (o/N) ")
-    return confirm.lower() == "o"
+    confirm = input(_("Use camera %d? (y/N) ") % index)
+    return confirm.lower() == "y"
 
 def save_camera(index):
     config = {}
@@ -46,12 +48,12 @@ def save_camera(index):
     with open(CONFIG_PATH, "w") as f:
         json.dump(config, f, indent=4)
 
-    print(f"✅ Caméra {index} enregistrée.")
+    print(_("✅ Camera %d saved.") % index)
 
 def select_camera():
     cameras = list_cameras()
     if not cameras:
-        print("Aucune caméra détectée.")
+        print(_("No camera detected."))
         return
 
     for cam in cameras:
@@ -59,4 +61,4 @@ def select_camera():
             save_camera(cam)
             return
 
-    print("Aucune caméra sélectionnée.")
+    print(_("No camera selected."))

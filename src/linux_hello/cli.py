@@ -9,6 +9,7 @@ import numpy as np
 from .doctor import main as doctor_main
 from .select_camera import select_camera as select_camera_fn
 from .enroll import enroll as enroll_fn
+from .i18n import _
 
 FACE_DIR = "/var/lib/linux-hello/faces"
 DEVICE = "/dev/video0"
@@ -27,7 +28,7 @@ def load_model():
 
 @cli.command()
 def add():
-    """Enregistrer un visage"""
+    """Register a face"""
     username = getpass.getuser()
     model = load_model()
 
@@ -37,23 +38,23 @@ def add():
 
     faces = model.get(frame)
     if not faces:
-        click.echo("Aucun visage détecté")
+        click.echo(_("No face detected"))
         return
 
     embedding = faces[0].embedding
     path = os.path.join(FACE_DIR, f"{username}.npy")
     np.save(path, embedding)
 
-    click.echo(f"✅ Embedding enregistré pour {username}")
+    click.echo(_("✅ Embedding saved for %s") % username)
 
 @cli.command()
 def test():
-    """Tester la reconnaissance"""
+    """Test recognition"""
     username = getpass.getuser()
     path = os.path.join(FACE_DIR, f"{username}.npy")
 
     if not os.path.exists(path):
-        click.echo("Aucun embedding enregistré")
+        click.echo(_("No embedding registered"))
         return
 
     saved = np.load(path)
@@ -65,18 +66,18 @@ def test():
 
     faces = model.get(frame)
     if not faces:
-        click.echo("Aucun visage détecté")
+        click.echo(_("No face detected"))
         return
 
     live = faces[0].embedding
     sim = np.dot(live, saved) / (np.linalg.norm(live) * np.linalg.norm(saved))
 
-    click.echo(f"Similarité : {sim:.3f}")
-    click.echo("✅ Reconnu" if sim > 0.35 else "❌ Non reconnu")
+    click.echo(_("Similarity: %.3f") % sim)
+    click.echo(_("✅ Recognized") if sim > 0.35 else _("❌ Not recognized"))
 
 @cli.command()
 def list():
-    """Lister les embeddings enregistrés"""
+    """List registered embeddings"""
     for f in os.listdir(FACE_DIR):
         if f.endswith(".npy"):
             click.echo(f[:-4])
@@ -84,28 +85,29 @@ def list():
 @cli.command()
 @click.argument("username")
 def remove(username):
-    """Supprimer un utilisateur"""
+    """Remove a user"""
     path = os.path.join(FACE_DIR, f"{username}.npy")
     if os.path.exists(path):
         os.remove(path)
-        click.echo(f"✅ Supprimé : {username}")
+        click.echo(_("✅ Deleted: %s") % username)
     else:
-        click.echo("Utilisateur introuvable")
+        click.echo(_("User not found"))
 
 @cli.command()
 def doctor():
-    """Diagnostique l'installation Linux Hello."""
+    """Diagnose Linux Hello installation."""
     doctor_main()
 
 @cli.command()
 def select_camera():
-    """Sélectionner la caméra utilisée pour la reconnaissance."""
+    """Select camera for recognition."""
     select_camera_fn()
 
 @cli.command()
 def enroll():
-    """Enregistrer votre visage pour l'authentification."""
+    """Register your face for authentication."""
     enroll_fn()
 
 def main():
     cli()
+

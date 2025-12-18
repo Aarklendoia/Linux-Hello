@@ -7,6 +7,17 @@ override_dh_auto_build:
 	true
 
 override_dh_auto_install:
+	# Compiler les traductions
+	for lang in fr en; do \
+		msgfmt po/$$lang.po -o po/$$lang.mo; \
+	done
+	
+	# Installer les fichiers de traduction
+	mkdir -p debian/linux-hello/usr/share/locale/fr/LC_MESSAGES
+	mkdir -p debian/linux-hello/usr/share/locale/en/LC_MESSAGES
+	cp po/fr.mo debian/linux-hello/usr/share/locale/fr/LC_MESSAGES/linux-hello.mo
+	cp po/en.mo debian/linux-hello/usr/share/locale/en/LC_MESSAGES/linux-hello.mo
+
 	# Générer le wheel
 	python3 -m pip wheel . --no-deps -w /tmp/linux-hello-build
 	
