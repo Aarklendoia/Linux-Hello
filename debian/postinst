@@ -8,6 +8,7 @@ echo "[linux-hello] Configuration du paquet…"
 
 # 1. Créer les dossiers de données
 mkdir -p /var/lib/linux-hello/faces
+chmod 755 /var/lib/linux-hello
 chmod 700 /var/lib/linux-hello/faces
 
 # 2. Créer ou réparer le venv
@@ -37,12 +38,32 @@ else
     echo "[linux-hello] systemd non disponible (WSL2 ?), service non activé."
 fi
 
-# 7. Lancer la configuration de la caméra si terminal interactif
+# 7. Installer le module PAM
+echo "[linux-hello] Installation du module PAM…"
+chmod 755 /usr/lib/linux-hello/pam_linux_hello.py
+chmod 644 /etc/pam.d/linux-hello
+
+# 8. Lancer la configuration de la caméra si terminal interactif
 if [ -t 1 ]; then
     echo "[linux-hello] Configuration initiale : sélection de la caméra…"
     /usr/bin/hello select-camera || true
 else
     echo "[linux-hello] Mode non interactif : configuration de la caméra ignorée."
 fi
+
+echo ""
+echo "[linux-hello] Pour activer l'authentification faciale dans PAM :"
+echo ""
+echo "Ajoutez la ligne suivante dans le fichier PAM du service souhaité :"
+echo "    auth    sufficient    pam_exec.so quiet stdout /usr/lib/linux-hello/pam_linux_hello.py"
+echo ""
+echo "Exemples :"
+echo "  sudo :      /etc/pam.d/sudo"
+echo "  login TTY : /etc/pam.d/login"
+echo "  GDM :       /etc/pam.d/gdm-password"
+echo ""
+echo "Linux‑Hello n'est pas activé automatiquement afin de respecter les"
+echo "bonnes pratiques Debian concernant la configuration PAM."
+echo ""
 
 echo "[linux-hello] Installation terminée."
