@@ -30,7 +30,6 @@ jobs:
             dh-python \
             python3-setuptools \
             python3-setuptools-scm \
-            python3-distutils \
             gettext \
             flake8 \
             pylint
