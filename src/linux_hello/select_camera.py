@@ -4,7 +4,7 @@ import os
 
 from .i18n import _
 
-CONFIG_PATH = "/etc/linux-hello/config.json"
+CONFIG_PATH = "/var/lib/linux-hello/config.json"
 
 def list_cameras(max_test=10):
     cameras = []
@@ -57,6 +57,12 @@ def save_camera(index):
     print(_("✅ Camera %d saved.") % index)
 
 def select_camera():
+    # Check if running as root/admin
+    if os.geteuid() != 0:
+        print(_("❌ This command requires administrator privileges."))
+        print(_("Please run: sudo hello select-camera"))
+        return
+    
     cameras = list_cameras()
     if not cameras:
         print(_("No camera detected."))

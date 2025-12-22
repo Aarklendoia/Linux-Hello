@@ -62,13 +62,13 @@ msgid "Socket missing"
 msgstr "套接字缺失"
 
 msgid "File exists but is not a socket"
-msgstr "File exists but is not a socket"
+msgstr "文件存在但不是套接字"
 
 msgid "Camera inaccessible"
-msgstr "摄像头不可访问"
+msgstr "摄像头无法访问"
 
 msgid "Faces directory missing"
-msgstr "Faces directory missing"
+msgstr "人脸目录丢失"
 
 msgid "No registered faces"
 msgstr "未注册的人脸"
@@ -77,41 +77,53 @@ msgid "=== Linux Hello Doctor ==="
 msgstr "=== Linux Hello Doctor ==="
 
 msgid "Venv present"
-msgstr "Venv present"
+msgstr "Venv 存在"
 
 msgid "Python in venv present"
-msgstr "Python in venv present"
+msgstr "venv 中的 Python 存在"
 
 msgid "InsightFace importable"
-msgstr "InsightFace importable"
+msgstr "InsightFace 可导入"
 
 msgid "Daemon active"
-msgstr "Daemon active"
+msgstr "守护程序活跃"
 
 msgid "Unix socket present"
-msgstr "Unix socket present"
+msgstr "Unix 套接字存在"
 
 msgid "Camera accessible"
-msgstr "Camera accessible"
+msgstr "摄像头可访问"
 
 msgid "Registered faces"
-msgstr "Registered faces"
+msgstr "已注册的人脸"
 
 msgid "Testing camera %d…"
-msgstr "Testing camera %d…"
+msgstr "正在测试摄像头 %d…"
 
 msgid "Look at the LED or preview. Press Enter to continue."
-msgstr "Look at the LED or preview. Press Enter to continue."
+msgstr "查看 LED 或预览。按 Enter 继续。"
 
 msgid "Use camera %d? (y/N) "
-msgstr "Use camera %d? (y/N) "
+msgstr "使用摄像头 %d？(y/N) "
 
 msgid "✅ Camera %d saved."
-msgstr "✅ Camera %d saved."
+msgstr "✅ 摄像头 %d 已保存。"
 
 msgid "No camera detected."
-msgstr "No camera detected."
+msgstr "未检测到摄像头。"
 
 msgid "No camera selected."
-msgstr "No camera selected."
+msgstr "未选择摄像头。"
+
+msgid "❌ This command requires administrator privileges."
+msgstr "❌ 此命令需要管理员权限。"
+
+msgid "Please run: sudo hello select-camera"
+msgstr "请运行：sudo hello select-camera"
+
+msgid "❌ This command cannot be run as root."
+msgstr "❌ 此命令不能以 root 身份运行。"
+
+msgid "Please run as a regular user."
+msgstr "请以普通用户身份运行。"
 

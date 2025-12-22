@@ -14,6 +14,13 @@ from .i18n import _
 FACE_DIR = "/var/lib/linux-hello/faces"
 DEVICE = "/dev/video0"
 
+def require_non_root():
+    """Check that command is not run as root"""
+    if os.geteuid() == 0:
+        click.echo(_("❌ This command cannot be run as root."))
+        click.echo(_("Please run as a regular user."))
+        raise SystemExit(1)
+
 @click.group()
 def cli():
     pass
@@ -29,6 +36,7 @@ def load_model():
 @cli.command()
 def add():
     """Register a face"""
+    require_non_root()
     username = getpass.getuser()
     model = load_model()
 
@@ -50,6 +58,7 @@ def add():
 @cli.command()
 def test():
     """Test recognition"""
+    require_non_root()
     username = getpass.getuser()
     path = os.path.join(FACE_DIR, f"{username}.npy")
 
@@ -106,6 +115,7 @@ def select_camera():
 @cli.command()
 def enroll():
     """Register your face for authentication."""
+    require_non_root()
     enroll_fn()
 
 def main():

@@ -1,7 +1,7 @@
 import json
 import os
 
-CONFIG_PATH = "/etc/linux-hello/config.json"
+CONFIG_PATH = "/var/lib/linux-hello/config.json"
 
 DEFAULT_CONFIG = {
     "camera_index": 0,

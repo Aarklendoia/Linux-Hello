@@ -62,13 +62,13 @@ msgid "Socket missing"
 msgstr "Сокет отсутствует"
 
 msgid "File exists but is not a socket"
-msgstr "File exists but is not a socket"
+msgstr "Файл существует, но это не сокет"
 
 msgid "Camera inaccessible"
 msgstr "Камера недоступна"
 
 msgid "Faces directory missing"
-msgstr "Faces directory missing"
+msgstr "Каталог лиц отсутствует"
 
 msgid "No registered faces"
 msgstr "Нет зарегистрированных лиц"
@@ -77,41 +77,53 @@ msgid "=== Linux Hello Doctor ==="
 msgstr "=== Linux Hello Doctor ==="
 
 msgid "Venv present"
-msgstr "Venv present"
+msgstr "Venv присутствует"
 
 msgid "Python in venv present"
-msgstr "Python in venv present"
+msgstr "Python в venv присутствует"
 
 msgid "InsightFace importable"
-msgstr "InsightFace importable"
+msgstr "InsightFace импортируется"
 
 msgid "Daemon active"
-msgstr "Daemon active"
+msgstr "Daemon активен"
 
 msgid "Unix socket present"
-msgstr "Unix socket present"
+msgstr "Unix сокет присутствует"
 
 msgid "Camera accessible"
-msgstr "Camera accessible"
+msgstr "Камера доступна"
 
 msgid "Registered faces"
-msgstr "Registered faces"
+msgstr "Зарегистрированные лица"
 
 msgid "Testing camera %d…"
-msgstr "Testing camera %d…"
+msgstr "Тестирование камеры %d…"
 
 msgid "Look at the LED or preview. Press Enter to continue."
-msgstr "Look at the LED or preview. Press Enter to continue."
+msgstr "Посмотрите на светодиод или предпросмотр. Нажмите Enter для продолжения."
 
 msgid "Use camera %d? (y/N) "
-msgstr "Use camera %d? (y/N) "
+msgstr "Использовать камеру %d? (д/N) "
 
 msgid "✅ Camera %d saved."
-msgstr "✅ Camera %d saved."
+msgstr "✅ Камера %d сохранена."
 
 msgid "No camera detected."
-msgstr "No camera detected."
+msgstr "Камера не обнаружена."
 
 msgid "No camera selected."
-msgstr "No camera selected."
+msgstr "Камера не выбрана."
+
+msgid "❌ This command requires administrator privileges."
+msgstr "❌ Эта команда требует привилегий администратора."
+
+msgid "Please run: sudo hello select-camera"
+msgstr "Пожалуйста, выполните: sudo hello select-camera"
+
+msgid "❌ This command cannot be run as root."
+msgstr "❌ Эта команда не может быть выполнена от имени root."
+
+msgid "Please run as a regular user."
+msgstr "Пожалуйста, выполните от имени обычного пользователя."
 

@@ -154,3 +154,19 @@ msgstr ""
 #: src/linux_hello/select_camera.py:64
 msgid "No camera selected."
 msgstr ""
+
+#: src/linux_hello/cli.py:20
+msgid "❌ This command requires administrator privileges."
+msgstr ""
+
+#: src/linux_hello/cli.py:21
+msgid "Please run: sudo hello select-camera"
+msgstr ""
+
+#: src/linux_hello/cli.py:18
+msgid "❌ This command cannot be run as root."
+msgstr ""
+
+#: src/linux_hello/cli.py:19
+msgid "Please run as a regular user."
+msgstr ""

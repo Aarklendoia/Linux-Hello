@@ -62,13 +62,13 @@ msgid "Socket missing"
 msgstr "Socket mancante"
 
 msgid "File exists but is not a socket"
-msgstr "File exists but is not a socket"
+msgstr "Il file esiste ma non è un socket"
 
 msgid "Camera inaccessible"
 msgstr "Fotocamera non accessibile"
 
 msgid "Faces directory missing"
-msgstr "Faces directory missing"
+msgstr "Directory dei volti mancante"
 
 msgid "No registered faces"
 msgstr "Nessun volto registrato"
@@ -77,41 +77,53 @@ msgid "=== Linux Hello Doctor ==="
 msgstr "=== Linux Hello Doctor ==="
 
 msgid "Venv present"
-msgstr "Venv present"
+msgstr "Venv presente"
 
 msgid "Python in venv present"
-msgstr "Python in venv present"
+msgstr "Python in venv presente"
 
 msgid "InsightFace importable"
-msgstr "InsightFace importable"
+msgstr "InsightFace importabile"
 
 msgid "Daemon active"
-msgstr "Daemon active"
+msgstr "Daemon attivo"
 
 msgid "Unix socket present"
-msgstr "Unix socket present"
+msgstr "Socket Unix presente"
 
 msgid "Camera accessible"
-msgstr "Camera accessible"
+msgstr "Fotocamera accessibile"
 
 msgid "Registered faces"
-msgstr "Registered faces"
+msgstr "Volti registrati"
 
 msgid "Testing camera %d…"
-msgstr "Testing camera %d…"
+msgstr "Test fotocamera %d…"
 
 msgid "Look at the LED or preview. Press Enter to continue."
-msgstr "Look at the LED or preview. Press Enter to continue."
+msgstr "Guardare il LED o l'anteprima. Premere Invio per continuare."
 
 msgid "Use camera %d? (y/N) "
-msgstr "Use camera %d? (y/N) "
+msgstr "Usare fotocamera %d? (s/N) "
 
 msgid "✅ Camera %d saved."
-msgstr "✅ Camera %d saved."
+msgstr "✅ Fotocamera %d salvata."
 
 msgid "No camera detected."
-msgstr "No camera detected."
+msgstr "Nessuna fotocamera rilevata."
 
 msgid "No camera selected."
-msgstr "No camera selected."
+msgstr "Nessuna fotocamera selezionata."
+
+msgid "❌ This command requires administrator privileges."
+msgstr "❌ Questo comando richiede privilegi di amministratore."
+
+msgid "Please run: sudo hello select-camera"
+msgstr "Eseguire: sudo hello select-camera"
+
+msgid "❌ This command cannot be run as root."
+msgstr "❌ Questo comando non può essere eseguito come root."
+
+msgid "Please run as a regular user."
+msgstr "Eseguire come utente regolare."
 

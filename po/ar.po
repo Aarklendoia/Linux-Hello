@@ -62,13 +62,13 @@ msgid "Socket missing"
 msgstr "المقبس غير موجود"
 
 msgid "File exists but is not a socket"
-msgstr "File exists but is not a socket"
+msgstr "الملف موجود لكنه ليس مقبسًا"
 
 msgid "Camera inaccessible"
 msgstr "الكاميرا غير متاحة"
 
 msgid "Faces directory missing"
-msgstr "Faces directory missing"
+msgstr "دليل الوجوه مفقود"
 
 msgid "No registered faces"
 msgstr "لا توجد وجوه مسجلة"
@@ -77,41 +77,53 @@ msgid "=== Linux Hello Doctor ==="
 msgstr "=== Linux Hello Doctor ==="
 
 msgid "Venv present"
-msgstr "Venv present"
+msgstr "Venv موجود"
 
 msgid "Python in venv present"
-msgstr "Python in venv present"
+msgstr "Python في venv موجود"
 
 msgid "InsightFace importable"
-msgstr "InsightFace importable"
+msgstr "InsightFace قابل للاستيراد"
 
 msgid "Daemon active"
-msgstr "Daemon active"
+msgstr "الخادم نشط"
 
 msgid "Unix socket present"
-msgstr "Unix socket present"
+msgstr "مقبس Unix موجود"
 
 msgid "Camera accessible"
-msgstr "Camera accessible"
+msgstr "الكاميرا متاحة"
 
 msgid "Registered faces"
-msgstr "Registered faces"
+msgstr "الوجوه المسجلة"
 
 msgid "Testing camera %d…"
-msgstr "Testing camera %d…"
+msgstr "اختبار الكاميرا %d…"
 
 msgid "Look at the LED or preview. Press Enter to continue."
-msgstr "Look at the LED or preview. Press Enter to continue."
+msgstr "انظر إلى LED أو المعاينة. اضغط Enter للمتابعة."
 
 msgid "Use camera %d? (y/N) "
-msgstr "Use camera %d? (y/N) "
+msgstr "هل تستخدم الكاميرا %d؟ (y/N) "
 
 msgid "✅ Camera %d saved."
-msgstr "✅ Camera %d saved."
+msgstr "✅ تم حفظ الكاميرا %d."
 
 msgid "No camera detected."
-msgstr "No camera detected."
+msgstr "لم يتم الكشف عن كاميرا."
 
 msgid "No camera selected."
-msgstr "No camera selected."
+msgstr "لم يتم تحديد كاميرا."
+
+msgid "❌ This command requires administrator privileges."
+msgstr "❌ هذا الأمر يتطلب امتيازات المسؤول."
+
+msgid "Please run: sudo hello select-camera"
+msgstr "يرجى تشغيل: sudo hello select-camera"
+
+msgid "❌ This command cannot be run as root."
+msgstr "❌ لا يمكن تشغيل هذا الأمر كجذر."
+
+msgid "Please run as a regular user."
+msgstr "يرجى تشغيله كمستخدم عادي."
 
