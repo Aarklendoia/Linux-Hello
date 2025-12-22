@@ -19,9 +19,6 @@ msgstr ""
 msgid "No face detected"
 msgstr "未检测到人脸"
 
-msgid "✅ Embedding saved for %s"
-msgstr "✅ 已为 %s 保存嵌入"
-
 msgid "No embedding registered"
 msgstr "未注册嵌入"
 
@@ -127,3 +124,23 @@ msgstr "❌ 此命令不能以 root 身份运行。"
 msgid "Please run as a regular user."
 msgstr "请以普通用户身份运行。"
 
+
+
+
+msgid "Test recognition"
+msgstr "测试识别"
+
+msgid "List registered embeddings"
+msgstr "列出已注册的伏箇"
+
+msgid "Remove a user"
+msgstr "削除一个用户"
+
+msgid "Select camera for recognition."
+msgstr "为识别选择摄像头。"
+
+msgid "Register your face for authentication."
+msgstr "注册你的人脸以进行身份验证。"
+
+msgid "Diagnose Linux Hello installation."
+msgstr "诊断 Linux Hello 安装。"

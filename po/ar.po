@@ -19,9 +19,6 @@ msgstr ""
 msgid "No face detected"
 msgstr "لم يتم اكتشاف أي وجه"
 
-msgid "✅ Embedding saved for %s"
-msgstr "✅ تم حفظ التضمين لـ %s"
-
 msgid "No embedding registered"
 msgstr "لا يوجد تضمين مسجل"
 
@@ -127,3 +124,23 @@ msgstr "❌ لا يمكن تشغيل هذا الأمر كجذر."
 msgid "Please run as a regular user."
 msgstr "يرجى تشغيله كمستخدم عادي."
 
+
+
+
+msgid "Test recognition"
+msgstr "التعرف على الوجه"
+
+msgid "List registered embeddings"
+msgstr "البحث عن الاختبارات المسجلة"
+
+msgid "Remove a user"
+msgstr "حذف مستخدم"
+
+msgid "Select camera for recognition."
+msgstr "اختر كاميرا للاعتراف بالوجه."
+
+msgid "Register your face for authentication."
+msgstr "سجل وجهك للماحققة."
+
+msgid "Diagnose Linux Hello installation."
+msgstr "تشخيص تثبيت Linux Hello."

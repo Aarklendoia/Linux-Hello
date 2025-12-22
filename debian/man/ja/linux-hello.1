@@ -1,67 +1,57 @@
-.TH LINUX-HELLO 1 "18 December 2025" "linux-hello 1.0.0" "User Commands"
+.TH LINUX-HELLO 1 "2025年12月18日" "linux-hello 1.0.0" "ユーザーコマンド"
 .SH 名前
-hello \- Linux facial authentication system with PAM integration
-.SH 使用法
+hello \- PAM統合を備えたLinux顔認証システム
+.SH 概要
 .B hello
-.I COMMAND
-.RI [ OPTIONS ]
+.I コマンド
+.RI [ オプション ]
 .SH 説明
 .B hello
-is a facial authentication system for Linux that integrates with PAM for secure
-login and system access. It uses InsightFace deep learning model for face recognition
-and supports multiple languages.
+はPAMと統合し、安全なログインとシステムアクセスを実現するLinux用の顔認証システムです。顔認識にはInsightFaceディープラーニングモデルを使用し、複数の言語をサポートしています。
 .SH コマンド
 .TP
-.B add USER
-Register a new user face. The system will capture the face image from the camera
-and store the facial embedding.
+.B enroll
+認証用に顔を登録します。システムはカメラから顔画像をキャプチャし、顔の埋め込みを保存します。このコマンドを複数回実行すると、保存された顔が更新されます。
 .TP
-.B test USER
-Test authentication for a specific user. The system will attempt to recognize
-the user's face from the camera.
+.B test
+顔認識をテストします。システムはカメラから顔を認識しようとし、類似度スコアを表示します。
 .TP
 .B list
-List all registered users with their enrollment status.
+登録されたすべてのユーザーと保存されている顔データをリストします。
 .TP
-.B remove USER
-Unregister a user and delete their stored facial data.
+.B remove ユーザー
+ユーザーの登録を解除し、保存されている顔データを削除します。
 .TP
 .B doctor
-Run system diagnostics to verify installation integrity. Checks:
+システム診断を実行してインストールの完全性を確認します。確認項目：
 .RS
 .IP \- 2
-Virtual environment presence
+仮想環境の存在
 .IP \-
-Python installation
+Pythonのインストール
 .IP \-
-InsightFace importability
+InsightFaceのインポート可能性
 .IP \-
-Daemon service status
+デーモンサービスのステータス
 .IP \-
-Unix socket connectivity
+Unixソケット接続
 .IP \-
-Camera accessibility
+カメラアクセシビリティ
 .IP \-
-Registered faces database
+登録済み顔データベース
 .RE
 .TP
 .B select-camera
-Interactive camera selection tool. Lists available cameras and allows
-configuration of the default camera for authentication.
-.TP
-.B enroll USER
-Alias for
-.B add USER
-. Register a new user face.
+インタラクティブなカメラ選択ツール。利用可能なカメラをリストし、認証用のデフォルトカメラを設定できます。
 .SH オプション
 .TP
 .B \-h, \-\-help
-Show help message and exit.
+ヘルプメッセージを表示して終了します。
 .TP
 .B \-v, \-\-version
-Show program version.
-.SH INTERNATIONALIZATION
-The system supports multiple languages through environment variables:
+プログラムバージョンを表示します。
+.SH 国際化
+システムは環境変数を通じて複数の言語をサポートしています：
 .TP
 English
 .B LANG=en_US.UTF-8 hello doctor
@@ -94,39 +84,39 @@ Português
 .B LANG=ar_AR.UTF-8 hello doctor
 .SH 例
 .TP
-Register a new user:
-.B hello add john
+顔を登録する：
+.B hello enroll
 .TP
-Test authentication:
-.B hello test john
+顔認識をテストする：
+.B hello test
 .TP
-List all users:
+登録されたユーザーをリストする：
 .B hello list
 .TP
-Run system diagnostics:
+システム診断を実行する：
 .B hello doctor
 .TP
-Select camera:
+カメラを選択する：
 .B hello select-camera
 .TP
-Remove user:
-.B hello remove john
-.SH デーモンサービス
-The system runs a background daemon service accessible via:
+ユーザーを削除する：
+.B hello remove たろう
+.SH デーモン
+システムはバックグラウンドデーモンサービスを実行し、次を通じてアクセスできます：
 .B systemctl status linux-hello
 .PP
-Start the daemon:
+デーモンを起動する：
 .B sudo systemctl start linux-hello
 .PP
-Enable on boot:
+ブート時に有効にする：
 .B sudo systemctl enable linux-hello
 .PP
-View logs:
+ログを表示する：
 .B journalctl -u linux-hello -f
 .SH PAM統合
-To enable facial authentication for login, add to
+ログイン時の顔認証を有効にするには、以下に追加してください：
 .I /etc/pam.d/login
-or
+または
 .I /etc/pam.d/sudo
 :
 .PP
@@ -134,23 +124,23 @@ or
 auth    sufficient    pam_exec.so quiet stdout /usr/lib/linux-hello/pam_linux_hello.py
 .RE
 .PP
-This will attempt facial authentication before falling back to password.
+パスワードにフォールバックする前に、顔認証を試みます。
 .SH 設定
-Configuration files are stored in:
-.B /etc/linux-hello/
+設定ファイルは以下に保存されます：
+.B /var/lib/linux-hello/
 .PP
-User face data is stored in:
-.B /var/lib/linux-hello/faces/
+ユーザー顔データは以下に保存されます：
+.B ~/.linux-hello/faces/
 .PP
-System logs are available via journalctl:
+システムログはjournalctlを通じて利用可能です：
 .B journalctl -u linux-hello
 .SH 関連項目
 .BR systemctl (1),
 .BR journalctl (1),
 .BR pam (8)
 .SH 作成者
-Linux Hello Development Team
+Linux Helloデベロップメントチーム
 .SH バグ
-Report bugs to the project repository.
+バグはプロジェクトリポジトリに報告してください。
 .SH ライセンス
-GNU General Public License v3.0 or later
+GNU General Public License v3.0以降

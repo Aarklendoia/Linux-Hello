@@ -1,67 +1,62 @@
-.TH LINUX-HELLO 1 "18 December 2025" "linux-hello 1.0.0" "User Commands"
+.TH LINUX-HELLO 1 "18 dicembre 2025" "linux-hello 1.0.0" "Comandi utente"
 .SH NOME
-hello \- Linux facial authentication system with PAM integration
-.SH SINOPSI
+hello \- Sistema di autenticazione facciale Linux con integrazione PAM
+.SH SINOSSI
 .B hello
-.I COMMAND
-.RI [ OPTIONS ]
+.I COMANDO
+.RI [ OPZIONI ]
 .SH DESCRIZIONE
 .B hello
-is a facial authentication system for Linux that integrates with PAM for secure
-login and system access. It uses InsightFace deep learning model for face recognition
-and supports multiple languages.
+è un sistema di autenticazione facciale per Linux che si integra con PAM per un
+accesso sicuro e l'accesso al sistema. Utilizza il modello di apprendimento profondo
+InsightFace per il riconoscimento facciale e supporta più lingue.
 .SH COMANDI
 .TP
-.B add USER
-Register a new user face. The system will capture the face image from the camera
-and store the facial embedding.
+.B enroll
+Registra il tuo viso per l'autenticazione. Il sistema acquisirà un'immagine del viso
+dalla fotocamera e memorizzerà l'incorporamento facciale. L'esecuzione più volte aggiornerà il viso memorizzato.
 .TP
-.B test USER
-Test authentication for a specific user. The system will attempt to recognize
-the user's face from the camera.
+.B test
+Testare il riconoscimento facciale. Il sistema tenterà di riconoscere il viso dalla fotocamera
+e visualizzerà il punteggio di somiglianza.
 .TP
 .B list
-List all registered users with their enrollment status.
+Elenca tutti gli utenti registrati con i dati del viso memorizzati.
 .TP
-.B remove USER
-Unregister a user and delete their stored facial data.
+.B remove UTENTE
+Annulla la registrazione di un utente ed elimina i dati facciali memorizzati.
 .TP
 .B doctor
-Run system diagnostics to verify installation integrity. Checks:
+Eseguire i diagnostici del sistema per verificare l'integrità dell'installazione. Controlla:
 .RS
 .IP \- 2
-Virtual environment presence
+Presenza dell'ambiente virtuale
 .IP \-
-Python installation
+Installazione Python
 .IP \-
-InsightFace importability
+Importabilità di InsightFace
 .IP \-
-Daemon service status
+Stato del servizio daemon
 .IP \-
-Unix socket connectivity
+Connettività socket Unix
 .IP \-
-Camera accessibility
+Accessibilità della fotocamera
 .IP \-
-Registered faces database
+Database dei visi registrati
 .RE
 .TP
 .B select-camera
-Interactive camera selection tool. Lists available cameras and allows
-configuration of the default camera for authentication.
-.TP
-.B enroll USER
-Alias for
-.B add USER
-. Register a new user face.
+Strumento di selezione della fotocamera interattivo. Elenca le fotocamere disponibili e consente
+di configurare la fotocamera predefinita per l'autenticazione.
 .SH OPZIONI
 .TP
 .B \-h, \-\-help
-Show help message and exit.
+Mostra il messaggio di aiuto e esce.
 .TP
 .B \-v, \-\-version
-Show program version.
-.SH INTERNATIONALIZATION
-The system supports multiple languages through environment variables:
+Mostra la versione del programma.
+.SH INTERNAZIONALIZZAZIONE
+Il sistema supporta più lingue tramite variabili di ambiente:
 .TP
 English
 .B LANG=en_US.UTF-8 hello doctor
@@ -94,39 +89,39 @@ Português
 .B LANG=ar_AR.UTF-8 hello doctor
 .SH ESEMPI
 .TP
-Register a new user:
-.B hello add john
+Registra il tuo viso:
+.B hello enroll
 .TP
-Test authentication:
-.B hello test john
+Testare il riconoscimento facciale:
+.B hello test
 .TP
-List all users:
+Elenca tutti gli utenti registrati:
 .B hello list
 .TP
-Run system diagnostics:
+Eseguire i diagnostici del sistema:
 .B hello doctor
 .TP
-Select camera:
+Seleziona fotocamera:
 .B hello select-camera
 .TP
-Remove user:
-.B hello remove john
-.SH SERVIZIO DAEMON
-The system runs a background daemon service accessible via:
+Rimuovere un utente:
+.B hello remove mario
+.SH DAEMON
+Il sistema esegue un servizio daemon in background accessibile tramite:
 .B systemctl status linux-hello
 .PP
-Start the daemon:
+Avvia il daemon:
 .B sudo systemctl start linux-hello
 .PP
-Enable on boot:
+Abilita all'avvio:
 .B sudo systemctl enable linux-hello
 .PP
-View logs:
+Visualizza i registri:
 .B journalctl -u linux-hello -f
 .SH INTEGRAZIONE PAM
-To enable facial authentication for login, add to
+Per abilitare l'autenticazione facciale per l'accesso, aggiungi a
 .I /etc/pam.d/login
-or
+o
 .I /etc/pam.d/sudo
 :
 .PP
@@ -134,23 +129,23 @@ or
 auth    sufficient    pam_exec.so quiet stdout /usr/lib/linux-hello/pam_linux_hello.py
 .RE
 .PP
-This will attempt facial authentication before falling back to password.
+Questo tenterà l'autenticazione facciale prima di ricorrere alla password.
 .SH CONFIGURAZIONE
-Configuration files are stored in:
-.B /etc/linux-hello/
+I file di configurazione sono archiviati in:
+.B /var/lib/linux-hello/
 .PP
-User face data is stored in:
-.B /var/lib/linux-hello/faces/
+I dati del viso dell'utente sono archiviati in:
+.B ~/.linux-hello/faces/
 .PP
-System logs are available via journalctl:
+I registri di sistema sono disponibili tramite journalctl:
 .B journalctl -u linux-hello
 .SH VEDERE ANCHE
 .BR systemctl (1),
 .BR journalctl (1),
 .BR pam (8)
 .SH AUTORE
-Linux Hello Development Team
-.SH BUG
-Report bugs to the project repository.
+Equipe di sviluppo Linux Hello
+.SH ERRORI
+Segnala i bug nel repository del progetto.
 .SH LICENZA
-GNU General Public License v3.0 or later
+GNU General Public License v3.0 o successiva

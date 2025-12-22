@@ -7,46 +7,46 @@ import pwd
 from .camera import open_camera
 from .embeddings import get_embedding
 
-FACES_DIR = "/var/lib/linux-hello/faces"
+def get_faces_dir():
+    """Get user-specific faces directory"""
+    home = os.path.expanduser("~")
+    faces_dir = os.path.join(home, ".linux-hello", "faces")
+    os.makedirs(faces_dir, exist_ok=True)
+    return faces_dir
 
 def enroll():
     user = getpass.getuser()
-    user_dir = os.path.join(FACES_DIR, user)
+    faces_dir = get_faces_dir()
 
-    # Permissions strictes
-    os.makedirs(user_dir, exist_ok=True)
-    info = pwd.getpwnam(user)
-    os.chown(user_dir, info.pw_uid, info.pw_gid)
-    os.chmod(user_dir, 0o700)
+    # Ensure directory exists with proper permissions
+    os.makedirs(faces_dir, exist_ok=True)
+    os.chmod(faces_dir, 0o700)
 
     cap = open_camera()
     if cap is None:
         print("Impossible d'ouvrir la caméra.")
         return
 
-    print("Regardez la caméra. Appuyez sur Entrée pour capturer.")
-    while True:
+    print("Capturant une image de la caméra…")
+    frame = None
+    for _ in range(10):  # Try up to 10 frames to get a good one
         ret, frame = cap.read()
-        if not ret:
-            continue
-
-        cv2.imshow("Capture", frame)
-        if cv2.waitKey(1) == 13:  # Entrée
+        if ret and frame is not None:
             break
 
     cap.release()
-    cv2.destroyAllWindows()
+
+    if frame is None:
+        print("Impossible de capturer une image.")
+        return
 
     emb = get_embedding(frame)
     if emb is None:
         print("Aucun visage détecté.")
         return
 
-    # Numérotation
-    existing = [f for f in os.listdir(user_dir) if f.endswith(".npy")]
-    index = len(existing)
-
-    path = os.path.join(user_dir, f"{index}.npy")
+    # Save with username
+    path = os.path.join(faces_dir, f"{user}.npy")
     np.save(path, emb)
 
     print(f"✅ Visage enregistré : {path}")

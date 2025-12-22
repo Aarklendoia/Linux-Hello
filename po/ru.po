@@ -19,9 +19,6 @@ msgstr ""
 msgid "No face detected"
 msgstr "Лицо не обнаружено"
 
-msgid "✅ Embedding saved for %s"
-msgstr "✅ Встраивание сохранено для %s"
-
 msgid "No embedding registered"
 msgstr "Встраивание не зарегистрировано"
 
@@ -127,3 +124,23 @@ msgstr "❌ Эта команда не может быть выполнена о
 msgid "Please run as a regular user."
 msgstr "Пожалуйста, выполните от имени обычного пользователя."
 
+
+
+
+msgid "Test recognition"
+msgstr "Проверить распознавание"
+
+msgid "List registered embeddings"
+msgstr "Список зарегистрированных эмбеддингов"
+
+msgid "Remove a user"
+msgstr "Удалить пользователя"
+
+msgid "Select camera for recognition."
+msgstr "Выберите камеру для распознавания."
+
+msgid "Register your face for authentication."
+msgstr "Регистрируйте свое лицо для аутентификации."
+
+msgid "Diagnose Linux Hello installation."
+msgstr "Диагностировать инсталляцию Linux Hello."

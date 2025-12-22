@@ -1,67 +1,57 @@
-.TH LINUX-HELLO 1 "18 December 2025" "linux-hello 1.0.0" "User Commands"
+.TH LINUX-HELLO 1 "18 ديسمبر 2025" "linux-hello 1.0.0" "أوامر المستخدم"
 .SH الاسم
-hello \- Linux facial authentication system with PAM integration
-.SH ملخص
+hello \- نظام المصادقة البيومترية Linux مع تكامل PAM
+.SH موجز
 .B hello
-.I COMMAND
-.RI [ OPTIONS ]
+.I أمر
+.RI [ خيارات ]
 .SH الوصف
 .B hello
-is a facial authentication system for Linux that integrates with PAM for secure
-login and system access. It uses InsightFace deep learning model for face recognition
-and supports multiple languages.
+هو نظام مصادقة بيومترية لنظام Linux يتكامل مع PAM لتسجيل الدخول الآمن والوصول إلى النظام. يستخدم نموذج التعلم العميق InsightFace للتعرف على الوجوه ويدعم لغات متعددة.
 .SH الأوامر
 .TP
-.B add USER
-Register a new user face. The system will capture the face image from the camera
-and store the facial embedding.
+.B enroll
+سجل وجهك للمصادقة. سيلتقط النظام صورة وجهك من الكاميرا ويخزن تضمين الوجه. سيؤدي تشغيل هذا عدة مرات إلى تحديث وجهك المخزن.
 .TP
-.B test USER
-Test authentication for a specific user. The system will attempt to recognize
-the user's face from the camera.
+.B test
+اختبر التعرف على الوجوه. سيحاول النظام التعرف على وجهك من الكاميرا وعرض درجة الحد من التشابه.
 .TP
 .B list
-List all registered users with their enrollment status.
+قائمة بجميع المستخدمين المسجلين مع بيانات وجهم المخزنة.
 .TP
-.B remove USER
-Unregister a user and delete their stored facial data.
+.B remove المستخدم
+قم بإلغاء تسجيل المستخدم وحذف بيانات وجهه المخزنة.
 .TP
 .B doctor
-Run system diagnostics to verify installation integrity. Checks:
+قم بتشغيل تشخيصات النظام للتحقق من سلامة التثبيت. الفحوصات:
 .RS
 .IP \- 2
-Virtual environment presence
+وجود بيئة افتراضية
 .IP \-
-Python installation
+تثبيت Python
 .IP \-
-InsightFace importability
+قابلية استيراد InsightFace
 .IP \-
-Daemon service status
+حالة خدمة daemon
 .IP \-
-Unix socket connectivity
+اتصال socket Unix
 .IP \-
-Camera accessibility
+إمكانية الوصول إلى الكاميرا
 .IP \-
-Registered faces database
+قاعدة بيانات الوجوه المسجلة
 .RE
 .TP
 .B select-camera
-Interactive camera selection tool. Lists available cameras and allows
-configuration of the default camera for authentication.
-.TP
-.B enroll USER
-Alias for
-.B add USER
-. Register a new user face.
+أداة اختيار الكاميرا التفاعلية. يسرد الكاميرات المتاحة ويسمح بتكوين الكاميرا الافتراضية للمصادقة.
 .SH الخيارات
 .TP
 .B \-h, \-\-help
-Show help message and exit.
+عرض رسالة المساعدة والخروج.
 .TP
 .B \-v, \-\-version
-Show program version.
-.SH INTERNATIONALIZATION
-The system supports multiple languages through environment variables:
+عرض إصدار البرنامج.
+.SH التدويل
+يدعم النظام لغات متعددة من خلال متغيرات البيئة:
 .TP
 English
 .B LANG=en_US.UTF-8 hello doctor
@@ -92,41 +82,41 @@ Português
 .TP
 العربية
 .B LANG=ar_AR.UTF-8 hello doctor
-.SH أمثلة
+.SH الأمثلة
 .TP
-Register a new user:
-.B hello add john
+سجل وجهك:
+.B hello enroll
 .TP
-Test authentication:
-.B hello test john
+اختبر التعرف على الوجوه:
+.B hello test
 .TP
-List all users:
+قائمة بجميع المستخدمين المسجلين:
 .B hello list
 .TP
-Run system diagnostics:
+قم بتشغيل تشخيصات النظام:
 .B hello doctor
 .TP
-Select camera:
+اختر الكاميرا:
 .B hello select-camera
 .TP
-Remove user:
-.B hello remove john
-.SH خدمة القيم
-The system runs a background daemon service accessible via:
+إزالة المستخدم:
+.B hello remove أحمد
+.SH daemon
+يشغل النظام خدمة daemon في الخلفية متاحة عبر:
 .B systemctl status linux-hello
 .PP
-Start the daemon:
+ابدأ daemon:
 .B sudo systemctl start linux-hello
 .PP
-Enable on boot:
+تفعيل عند الإقلاع:
 .B sudo systemctl enable linux-hello
 .PP
-View logs:
+عرض السجلات:
 .B journalctl -u linux-hello -f
 .SH تكامل PAM
-To enable facial authentication for login, add to
+لتفعيل المصادقة البيومترية لتسجيل الدخول، أضف إلى
 .I /etc/pam.d/login
-or
+أو
 .I /etc/pam.d/sudo
 :
 .PP
@@ -134,23 +124,23 @@ or
 auth    sufficient    pam_exec.so quiet stdout /usr/lib/linux-hello/pam_linux_hello.py
 .RE
 .PP
-This will attempt facial authentication before falling back to password.
+سيحاول هذا المصادقة البيومترية قبل العودة إلى كلمة المرور.
 .SH التكوين
-Configuration files are stored in:
-.B /etc/linux-hello/
+يتم تخزين ملفات التكوين في:
+.B /var/lib/linux-hello/
 .PP
-User face data is stored in:
-.B /var/lib/linux-hello/faces/
+يتم تخزين بيانات وجه المستخدم في:
+.B ~/.linux-hello/faces/
 .PP
-System logs are available via journalctl:
+يتم توفير السجلات النظامية عبر journalctl:
 .B journalctl -u linux-hello
 .SH انظر أيضا
 .BR systemctl (1),
 .BR journalctl (1),
 .BR pam (8)
 .SH المؤلف
-Linux Hello Development Team
+فريق تطوير Linux Hello
 .SH الأخطاء
-Report bugs to the project repository.
+أبلغ عن الأخطاء إلى مستودع المشروع.
 .SH الترخيص
-GNU General Public License v3.0 or later
+GNU General Public License v3.0 أو إصدار أحدث

@@ -9,7 +9,14 @@ from .embeddings import get_embedding
 from .config import load_config
 
 SOCKET_PATH = "/run/linux-hello/daemon.sock"
-FACES_DIR = "/var/lib/linux-hello/faces"
+
+def get_faces_dir(user: str = None):
+    """Get user-specific faces directory"""
+    if user is None:
+        user = getpass.getuser()
+    home = os.path.expanduser(f"~{user}" if user != getpass.getuser() else "~")
+    faces_dir = os.path.join(home, ".linux-hello", "faces")
+    return faces_dir
 
 
 def cosine_similarity(a, b):
@@ -21,15 +28,25 @@ class HelloDaemon:
         self.config = load_config()
 
     def _load_user_embeddings(self, user: str):
-        user_dir = os.path.join(FACES_DIR, user)
-        if not os.path.isdir(user_dir):
+        faces_dir = get_faces_dir(user)
+        # Check if user has a single .npy file or subdirectory
+        if os.path.isfile(f"{faces_dir}/{user}.npy"):
+            # Single embedding per user
+            try:
+                emb = np.load(f"{faces_dir}/{user}.npy")
+                return [emb]
+            except Exception:
+                return []
+        
+        # Multiple embeddings per user (in subdirectory)
+        if not os.path.isdir(faces_dir):
             return []
 
         embeddings = []
-        for name in os.listdir(user_dir):
+        for name in os.listdir(faces_dir):
             if not name.endswith(".npy"):
                 continue
-            path = os.path.join(user_dir, name)
+            path = os.path.join(faces_dir, name)
             try:
                 emb = np.load(path)
                 embeddings.append(emb)

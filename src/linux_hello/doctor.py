@@ -4,12 +4,20 @@ import sys
 import socket
 import cv2
 import stat
+import getpass
 
 from .i18n import _
 
 VENV = "/opt/linux-hello/venv"
 SOCKET_PATH = "/run/linux-hello/daemon.sock"
-FACES_DIR = "/var/lib/linux-hello/faces"
+
+def get_faces_dir(user: str = None):
+    """Get user-specific faces directory"""
+    if user is None:
+        user = getpass.getuser()
+    home = os.path.expanduser(f"~{user}" if user != getpass.getuser() else "~")
+    faces_dir = os.path.join(home, ".linux-hello", "faces")
+    return faces_dir
 
 def check(title, func):
     print(f"→ {title}… ", end="")
@@ -54,9 +62,11 @@ def check_camera():
     cap.release()
 
 def check_faces_dir():
-    if not os.path.isdir(FACES_DIR):
+    faces_dir = get_faces_dir()
+    if not os.path.isdir(faces_dir):
         raise Exception(_("Faces directory missing"))
-    if not os.listdir(FACES_DIR):
+    # Check for .npy files in either location
+    if not os.path.isfile(f"{faces_dir}/{getpass.getuser()}.npy") and not os.listdir(faces_dir):
         raise Exception(_("No registered faces"))
 
 def main():

@@ -19,9 +19,6 @@ msgstr ""
 msgid "No face detected"
 msgstr "Ningún rostro detectado"
 
-msgid "✅ Embedding saved for %s"
-msgstr "✅ Incrustación guardada para %s"
-
 msgid "No embedding registered"
 msgstr "Ninguna incrustación registrada"
 
@@ -127,3 +124,23 @@ msgstr "❌ Este comando no puede ejecutarse como root."
 msgid "Please run as a regular user."
 msgstr "Por favor, ejecute como un usuario normal."
 
+
+
+
+msgid "Test recognition"
+msgstr "Probar reconocimiento"
+
+msgid "List registered embeddings"
+msgstr "Listar embeddings registrados"
+
+msgid "Remove a user"
+msgstr "Eliminar un usuario"
+
+msgid "Select camera for recognition."
+msgstr "Seleccionar cámara para el reconocimiento."
+
+msgid "Register your face for authentication."
+msgstr "Registre su rostro para la autenticación."
+
+msgid "Diagnose Linux Hello installation."
+msgstr "Diagnosticar la instalación de Linux Hello."

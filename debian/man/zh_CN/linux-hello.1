@@ -1,67 +1,57 @@
-.TH LINUX-HELLO 1 "18 December 2025" "linux-hello 1.0.0" "User Commands"
+.TH LINUX-HELLO 1 "2025年12月18日" "linux-hello 1.0.0" "用户命令"
 .SH 名称
-hello \- Linux facial authentication system with PAM integration
+hello \- 具有PAM集成的Linux面部认证系统
 .SH 概要
 .B hello
-.I COMMAND
-.RI [ OPTIONS ]
+.I 命令
+.RI [ 选项 ]
 .SH 描述
 .B hello
-is a facial authentication system for Linux that integrates with PAM for secure
-login and system access. It uses InsightFace deep learning model for face recognition
-and supports multiple languages.
+是一个Linux面部认证系统，与PAM集成以实现安全登录和系统访问。它使用InsightFace深度学习模型进行人脸识别，并支持多种语言。
 .SH 命令
 .TP
-.B add USER
-Register a new user face. The system will capture the face image from the camera
-and store the facial embedding.
+.B enroll
+注册您的面部以进行身份验证。系统将从摄像头捕获面部图像并存储面部嵌入。多次运行此命令将更新您存储的面部。
 .TP
-.B test USER
-Test authentication for a specific user. The system will attempt to recognize
-the user's face from the camera.
+.B test
+测试面部识别。系统将尝试从摄像头识别您的面部并显示相似度分数。
 .TP
 .B list
-List all registered users with their enrollment status.
+列出所有已注册的用户及其存储的面部数据。
 .TP
-.B remove USER
-Unregister a user and delete their stored facial data.
+.B remove 用户
+取消注册用户并删除其存储的面部数据。
 .TP
 .B doctor
-Run system diagnostics to verify installation integrity. Checks:
+运行系统诊断以验证安装完整性。检查：
 .RS
 .IP \- 2
-Virtual environment presence
+虚拟环境的存在
 .IP \-
-Python installation
+Python安装
 .IP \-
-InsightFace importability
+InsightFace可导入性
 .IP \-
-Daemon service status
+守护进程服务状态
 .IP \-
-Unix socket connectivity
+Unix套接字连接
 .IP \-
-Camera accessibility
+摄像头可访问性
 .IP \-
-Registered faces database
+已注册的人脸数据库
 .RE
 .TP
 .B select-camera
-Interactive camera selection tool. Lists available cameras and allows
-configuration of the default camera for authentication.
-.TP
-.B enroll USER
-Alias for
-.B add USER
-. Register a new user face.
+交互式摄像头选择工具。列出可用的摄像头并允许配置用于身份验证的默认摄像头。
 .SH 选项
 .TP
 .B \-h, \-\-help
-Show help message and exit.
+显示帮助消息并退出。
 .TP
 .B \-v, \-\-version
-Show program version.
-.SH INTERNATIONALIZATION
-The system supports multiple languages through environment variables:
+显示程序版本。
+.SH 国际化
+该系统通过环境变量支持多种语言：
 .TP
 English
 .B LANG=en_US.UTF-8 hello doctor
@@ -92,41 +82,41 @@ Português
 .TP
 العربية
 .B LANG=ar_AR.UTF-8 hello doctor
-.SH 例子
+.SH 例
 .TP
-Register a new user:
-.B hello add john
+注册您的面部：
+.B hello enroll
 .TP
-Test authentication:
-.B hello test john
+测试面部识别：
+.B hello test
 .TP
-List all users:
+列出所有已注册的用户：
 .B hello list
 .TP
-Run system diagnostics:
+运行系统诊断：
 .B hello doctor
 .TP
-Select camera:
+选择摄像头：
 .B hello select-camera
 .TP
-Remove user:
-.B hello remove john
-.SH 守护进程服务
-The system runs a background daemon service accessible via:
+删除用户：
+.B hello remove 李明
+.SH 守护进程
+系统运行后台守护进程服务，可通过以下方式访问：
 .B systemctl status linux-hello
 .PP
-Start the daemon:
+启动守护进程：
 .B sudo systemctl start linux-hello
 .PP
-Enable on boot:
+在启动时启用：
 .B sudo systemctl enable linux-hello
 .PP
-View logs:
+查看日志：
 .B journalctl -u linux-hello -f
-.SH PAM 集成
-To enable facial authentication for login, add to
+.SH PAM集成
+要为登录启用面部认证，请添加到
 .I /etc/pam.d/login
-or
+或
 .I /etc/pam.d/sudo
 :
 .PP
@@ -134,23 +124,23 @@ or
 auth    sufficient    pam_exec.so quiet stdout /usr/lib/linux-hello/pam_linux_hello.py
 .RE
 .PP
-This will attempt facial authentication before falling back to password.
+这将在回退到密码之前尝试面部认证。
 .SH 配置
-Configuration files are stored in:
-.B /etc/linux-hello/
+配置文件存储在：
+.B /var/lib/linux-hello/
 .PP
-User face data is stored in:
-.B /var/lib/linux-hello/faces/
+用户面部数据存储在：
+.B ~/.linux-hello/faces/
 .PP
-System logs are available via journalctl:
+系统日志可通过journalctl获得：
 .B journalctl -u linux-hello
-.SH 参见
+.SH 另见
 .BR systemctl (1),
 .BR journalctl (1),
 .BR pam (8)
 .SH 作者
-Linux Hello Development Team
+Linux Hello开发团队
 .SH 错误
-Report bugs to the project repository.
+报告错误到项目存储库。
 .SH 许可证
-GNU General Public License v3.0 or later
+GNU General Public License v3.0或更高版本

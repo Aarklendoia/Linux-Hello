@@ -1,67 +1,62 @@
-.TH LINUX-HELLO 1 "18 December 2025" "linux-hello 1.0.0" "User Commands"
-.SH ИМЯ
-hello \- Linux facial authentication system with PAM integration
+.TH LINUX-HELLO 1 "18 декабря 2025" "linux-hello 1.0.0" "Команды пользователя"
+.SH НАЗВАНИЕ
+hello \- Система аутентификации по лицам Linux с интеграцией PAM
 .SH СИНОПСИС
 .B hello
-.I COMMAND
-.RI [ OPTIONS ]
+.I КОМАНДА
+.RI [ ПАРАМЕТРЫ ]
 .SH ОПИСАНИЕ
 .B hello
-is a facial authentication system for Linux that integrates with PAM for secure
-login and system access. It uses InsightFace deep learning model for face recognition
-and supports multiple languages.
+это система аутентификации по лицам для Linux, которая интегрируется с PAM для безопасного
+входа и доступа к системе. Она использует модель глубокого обучения InsightFace
+для распознавания лиц и поддерживает несколько языков.
 .SH КОМАНДЫ
 .TP
-.B add USER
-Register a new user face. The system will capture the face image from the camera
-and store the facial embedding.
+.B enroll
+Зарегистрируйте своё лицо для аутентификации. Система захватит изображение лица
+с камеры и сохранит встраивание лица. Многократное выполнение обновит сохранённое лицо.
 .TP
-.B test USER
-Test authentication for a specific user. The system will attempt to recognize
-the user's face from the camera.
+.B test
+Тестирование распознавания лиц. Система попытается распознать ваше лицо с камеры
+и отобразит оценку сходства.
 .TP
 .B list
-List all registered users with their enrollment status.
+Перечислить всех зарегистрированных пользователей с сохранёнными данными лиц.
 .TP
-.B remove USER
-Unregister a user and delete their stored facial data.
+.B remove ПОЛЬЗОВАТЕЛЬ
+Отменить регистрацию пользователя и удалить его сохранённые данные лица.
 .TP
 .B doctor
-Run system diagnostics to verify installation integrity. Checks:
+Запустить диагностику системы для проверки целостности установки. Проверяет:
 .RS
 .IP \- 2
-Virtual environment presence
+Наличие виртуального окружения
 .IP \-
-Python installation
+Установку Python
 .IP \-
-InsightFace importability
+Импортируемость InsightFace
 .IP \-
-Daemon service status
+Статус демона
 .IP \-
-Unix socket connectivity
+Связность Unix сокета
 .IP \-
-Camera accessibility
+Доступность камеры
 .IP \-
-Registered faces database
+База зарегистрированных лиц
 .RE
 .TP
 .B select-camera
-Interactive camera selection tool. Lists available cameras and allows
-configuration of the default camera for authentication.
-.TP
-.B enroll USER
-Alias for
-.B add USER
-. Register a new user face.
-.SH ОПЦИИ
+Интерактивный инструмент выбора камеры. Выводит список доступных камер и позволяет
+настроить камеру по умолчанию для аутентификации.
+.SH ПАРАМЕТРЫ
 .TP
 .B \-h, \-\-help
-Show help message and exit.
+Показывает справку и выходит.
 .TP
 .B \-v, \-\-version
-Show program version.
-.SH INTERNATIONALIZATION
-The system supports multiple languages through environment variables:
+Показывает версию программы.
+.SH ИНТЕРНАЦИОНАЛИЗАЦИЯ
+Система поддерживает несколько языков через переменные окружения:
 .TP
 English
 .B LANG=en_US.UTF-8 hello doctor
@@ -94,39 +89,39 @@ Português
 .B LANG=ar_AR.UTF-8 hello doctor
 .SH ПРИМЕРЫ
 .TP
-Register a new user:
-.B hello add john
+Зарегистрируйте своё лицо:
+.B hello enroll
 .TP
-Test authentication:
-.B hello test john
+Тестирование распознавания лиц:
+.B hello test
 .TP
-List all users:
+Перечислить зарегистрированных пользователей:
 .B hello list
 .TP
-Run system diagnostics:
+Запустить диагностику системы:
 .B hello doctor
 .TP
-Select camera:
+Выбрать камеру:
 .B hello select-camera
 .TP
-Remove user:
-.B hello remove john
-.SH СЛУЖБА ДЕМОНА
-The system runs a background daemon service accessible via:
+Удалить пользователя:
+.B hello remove иван
+.SH ДЕМОН
+Система запускает фоновый демон, доступный через:
 .B systemctl status linux-hello
 .PP
-Start the daemon:
+Запустить демон:
 .B sudo systemctl start linux-hello
 .PP
-Enable on boot:
+Включить при загрузке:
 .B sudo systemctl enable linux-hello
 .PP
-View logs:
+Посмотреть логи:
 .B journalctl -u linux-hello -f
 .SH ИНТЕГРАЦИЯ PAM
-To enable facial authentication for login, add to
+Для включения аутентификации по лицам при входе добавьте в
 .I /etc/pam.d/login
-or
+или
 .I /etc/pam.d/sudo
 :
 .PP
@@ -134,23 +129,23 @@ or
 auth    sufficient    pam_exec.so quiet stdout /usr/lib/linux-hello/pam_linux_hello.py
 .RE
 .PP
-This will attempt facial authentication before falling back to password.
+Это попытается аутентифицировать по лицу перед использованием пароля.
 .SH КОНФИГУРАЦИЯ
-Configuration files are stored in:
-.B /etc/linux-hello/
+Файлы конфигурации хранятся в:
+.B /var/lib/linux-hello/
 .PP
-User face data is stored in:
-.B /var/lib/linux-hello/faces/
+Данные лица пользователя хранятся в:
+.B ~/.linux-hello/faces/
 .PP
-System logs are available via journalctl:
+Системные логи доступны через journalctl:
 .B journalctl -u linux-hello
-.SH СМОТРИТЕ ТАКЖЕ
+.SH СМ. ТАКЖЕ
 .BR systemctl (1),
 .BR journalctl (1),
 .BR pam (8)
 .SH АВТОР
-Linux Hello Development Team
+Команда разработки Linux Hello
 .SH ОШИБКИ
-Report bugs to the project repository.
+Сообщайте об ошибках в репозиторий проекта.
 .SH ЛИЦЕНЗИЯ
-GNU General Public License v3.0 or later
+GNU General Public License v3.0 или новее

@@ -12,16 +12,16 @@ login and system access. It uses InsightFace deep learning model for face recogn
 and supports multiple languages.
 .SH COMMANDS
 .TP
-.B add USER
-Register a new user face. The system will capture the face image from the camera
-and store the facial embedding.
+.B enroll
+Register your face for authentication. The system will capture a face image from the camera
+and store the facial embedding. Running this multiple times will update your stored face.
 .TP
-.B test USER
-Test authentication for a specific user. The system will attempt to recognize
-the user's face from the camera.
+.B test
+Test facial recognition. The system will attempt to recognize your face from the camera
+and display the similarity score.
 .TP
 .B list
-List all registered users with their enrollment status.
+List all registered users with their stored face data.
 .TP
 .B remove USER
 Unregister a user and delete their stored facial data.
@@ -48,11 +48,6 @@ Registered faces database
 .B select-camera
 Interactive camera selection tool. Lists available cameras and allows
 configuration of the default camera for authentication.
-.TP
-.B enroll USER
-Alias for
-.B add USER
-. Register a new user face.
 .SH OPTIONS
 .TP
 .B \-h, \-\-help
@@ -94,13 +89,13 @@ Português
 .B LANG=ar_AR.UTF-8 hello doctor
 .SH EXAMPLES
 .TP
-Register a new user:
-.B hello add john
+Register your face:
+.B hello enroll
 .TP
-Test authentication:
-.B hello test john
+Test facial recognition:
+.B hello test
 .TP
-List all users:
+List all registered users:
 .B hello list
 .TP
 Run system diagnostics:
@@ -109,7 +104,7 @@ Run system diagnostics:
 Select camera:
 .B hello select-camera
 .TP
-Remove user:
+Remove a user:
 .B hello remove john
 .SH DAEMON
 The system runs a background daemon service accessible via:
@@ -137,10 +132,10 @@ auth    sufficient    pam_exec.so quiet stdout /usr/lib/linux-hello/pam_linux_he
 This will attempt facial authentication before falling back to password.
 .SH CONFIGURATION
 Configuration files are stored in:
-.B /etc/linux-hello/
+.B /var/lib/linux-hello/
 .PP
 User face data is stored in:
-.B /var/lib/linux-hello/faces/
+.B ~/.linux-hello/faces/
 .PP
 System logs are available via journalctl:
 .B journalctl -u linux-hello

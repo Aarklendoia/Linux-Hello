@@ -21,11 +21,6 @@ msgstr ""
 msgid "No face detected"
 msgstr "Aucun visage détecté"
 
-#: src/linux_hello/cli.py:48
-#, python-format
-msgid "✅ Embedding saved for %s"
-msgstr "✅ Embedding enregistré pour %s"
-
 #: src/linux_hello/cli.py:57
 msgid "No embedding registered"
 msgstr "Aucun embedding enregistré"
@@ -170,3 +165,24 @@ msgstr "❌ Cette commande ne peut pas être exécutée en tant que root."
 #: src/linux_hello/cli.py:19
 msgid "Please run as a regular user."
 msgstr "Veuillez exécuter en tant qu'utilisateur normal."
+
+msgid "Diagnosis complete."
+msgstr "Diagnostic terminé."
+
+msgid "Test recognition"
+msgstr "Tester la reconnaissance"
+
+msgid "List registered embeddings"
+msgstr "Lister les embeddings enregistrés"
+
+msgid "Remove a user"
+msgstr "Supprimer un utilisateur"
+
+msgid "Select camera for recognition."
+msgstr "Sélectionner une caméra pour la reconnaissance."
+
+msgid "Register your face for authentication."
+msgstr "Enregistrer votre visage pour l'authentification."
+
+msgid "Diagnose Linux Hello installation."
+msgstr "Diagnostiquer l'installation de Linux Hello."
