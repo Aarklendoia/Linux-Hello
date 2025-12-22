@@ -1,4 +1,4 @@
 usr/lib/linux-hello/repair_venv.sh usr/lib/linux-hello/
 debian/linux-hello.service usr/lib/systemd/system/
 usr/lib/linux-hello/pam_linux_hello.py usr/lib/linux-hello/
-debian/linux-hello.pam etc/pam.d/linux-hello
+debian/linux-hello.pam etc/pam.d/

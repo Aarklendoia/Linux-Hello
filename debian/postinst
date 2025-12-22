@@ -47,14 +47,6 @@ echo "[linux-hello] Installation du module PAM…"
 chmod 755 /usr/lib/linux-hello/pam_linux_hello.py
 chmod 644 /etc/pam.d/linux-hello
 
-# 8. Lancer la configuration de la caméra si terminal interactif
-if [ -t 1 ]; then
-    echo "[linux-hello] Configuration initiale : sélection de la caméra…"
-    /usr/bin/hello select-camera || true
-else
-    echo "[linux-hello] Mode non interactif : configuration de la caméra ignorée."
-fi
-
 echo ""
 echo "[linux-hello] Pour activer l'authentification faciale dans PAM :"
 echo ""
