@@ -8,7 +8,7 @@ from .camera import open_camera
 from .embeddings import get_embedding
 from .config import load_config
 
-SOCKET_PATH = "/var/run/linux-hello.sock"
+SOCKET_PATH = "/run/linux-hello/daemon.sock"
 FACES_DIR = "/var/lib/linux-hello/faces"
 
 

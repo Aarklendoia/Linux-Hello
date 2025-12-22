@@ -12,12 +12,19 @@ echo "$(gettext "[linux-hello] Configuration du paquet…")"
 
 # 1. Créer les dossiers de données
 mkdir -p /var/lib/linux-hello/faces
+mkdir -p /etc/linux-hello
 chmod 755 /var/lib/linux-hello
-chmod 700 /var/lib/linux-hello/faces
+chmod 755 /var/lib/linux-hello/faces
+chmod 755 /etc/linux-hello
 
 # 2. Créer ou réparer le venv
 echo "[linux-hello] Vérification du venv…"
 /usr/lib/linux-hello/repair_venv.sh || true
+
+# 2b. Fixer les permissions du venv pour que linux-hello puisse l'utiliser
+echo "[linux-hello] Ajustement des permissions du venv…"
+chown -R linux-hello:linux-hello "$VENV"
+chmod -R u+rw,g+r,o+r "$VENV"
 
 # 3. Installer onnxruntime si absent
 if ! "$VENV/bin/python3" -c "import onnxruntime" 2>/dev/null; then

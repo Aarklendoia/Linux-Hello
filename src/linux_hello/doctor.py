@@ -8,7 +8,7 @@ import stat
 from .i18n import _
 
 VENV = "/opt/linux-hello/venv"
-SOCKET_PATH = "/var/run/linux-hello.sock"
+SOCKET_PATH = "/run/linux-hello/daemon.sock"
 FACES_DIR = "/var/lib/linux-hello/faces"
 
 def check(title, func):
