@@ -20,7 +20,18 @@ def enroll():
 
     # Ensure directory exists with proper permissions
     os.makedirs(faces_dir, exist_ok=True)
-    os.chmod(faces_dir, 0o700)
+    os.chmod(faces_dir, 0o750)  # rwxr-x--- (owner full, linux-hello group can read)
+    
+    # Set group ownership to linux-hello for access by daemon
+    try:
+        import grp
+        linux_hello_gid = grp.getgrall()
+        for group in grp.getgrall():
+            if group.gr_name == "linux-hello":
+                os.chown(faces_dir, -1, group.gr_gid)
+                break
+    except Exception:
+        pass
 
     cap = open_camera()
     if cap is None:
@@ -48,5 +59,18 @@ def enroll():
     # Save with username
     path = os.path.join(faces_dir, f"{user}.npy")
     np.save(path, emb)
+    
+    # Set proper permissions: owner rw, linux-hello group r
+    os.chmod(path, 0o640)
+    
+    # Set group ownership to linux-hello
+    try:
+        import grp
+        for group in grp.getgrall():
+            if group.gr_name == "linux-hello":
+                os.chown(path, -1, group.gr_gid)
+                break
+    except Exception:
+        pass
 
     print(f"✅ Visage enregistré : {path}")

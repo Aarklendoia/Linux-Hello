@@ -55,32 +55,42 @@ class HelloDaemon:
 
         return embeddings
 
-    def authenticate(self) -> str:
-        user = getpass.getuser()
+    def authenticate(self, user: str = None) -> str:
+        if user is None:
+            user = getpass.getuser()
         threshold = self.config.get("threshold", 0.35)
+        
+        print(f"[DEBUG] Authenticating user: {user}, threshold: {threshold}", flush=True)
 
         embeddings = self._load_user_embeddings(user)
         if not embeddings:
+            print(f"[DEBUG] No embeddings found for {user}", flush=True)
             return "NO_FACE"
 
         cap = open_camera()
         if cap is None:
+            print(f"[DEBUG] Camera not available", flush=True)
             return "NO_CAMERA"
 
         ret, frame = cap.read()
         cap.release()
         if not ret:
+            print(f"[DEBUG] Failed to read frame", flush=True)
             return "NO_CAMERA"
 
         emb_live = get_embedding(frame)
         if emb_live is None:
+            print(f"[DEBUG] No face detected in frame", flush=True)
             return "NO_FACE"
 
-        for emb_saved in embeddings:
+        for i, emb_saved in enumerate(embeddings):
             sim = cosine_similarity(emb_live, emb_saved)
+            print(f"[DEBUG] Similarity score {i}: {sim:.4f} (threshold: {threshold})", flush=True)
             if sim >= threshold:
+                print(f"[DEBUG] Match found! Returning OK", flush=True)
                 return "OK"
 
+        print(f"[DEBUG] No match found. Returning FAIL", flush=True)
         return "FAIL"
 
     def _prepare_socket(self):
@@ -101,7 +111,13 @@ class HelloDaemon:
             try:
                 data = conn.recv(1024).decode().strip()
                 if data == "AUTH":
+                    # No username provided, use current user
                     result = self.authenticate()
+                    conn.send(result.encode())
+                elif data.startswith("AUTH:"):
+                    # Username provided
+                    username = data.split(":", 1)[1]
+                    result = self.authenticate(username)
                     conn.send(result.encode())
                 else:
                     conn.send(b"ERROR")
