@@ -1,0 +1,84 @@
+.TH LINUX-HELLO-PAM-CONFIRM 1 "Décembre 2025" "linux-hello 1.0.0" "Commandes utilisateur"
+.SH NOM
+linux-hello-pam-confirm \- Dialogue de confirmation GUI pour l'authentification PAM Linux Hello
+
+.SH SYNOPSIS
+.B linux-hello-pam-confirm
+.BI --username= NOM_UTILISATEUR
+.BI --pipe= CHEMIN_FIFO
+[\fB--no-gui\fR]
+
+.SH DESCRIPTION
+Affiche un dialogue de confirmation graphique après une reconnaissance faciale réussie.
+Ce script est automatiquement lancé par le module PAM et supporte plusieurs environnements de bureau.
+
+.SS Support des environnements de bureau
+.IP KDE
+Utilise \fBkdialog\fR pour les dialogues natifs KDE si disponible (recommandé)
+.IP GNOME/XFCE
+Retombe sur \fBzenity\fR si kdialog n'est pas disponible
+.IP Générique
+Utilise l'interface PySide6 en dernier recours
+
+.SS Notifications de bureau
+Envoie des notifications D-Bus à chaque étape :
+.IP "Reconnaissance en cours"
+Quand la reconnaissance faciale démarre
+.IP "Confirmation reçue"
+Quand l'utilisateur clique sur Confirmer/Annuler
+
+.SH OPTIONS
+.TP
+.BI --username= NOM_UTILISATEUR
+Nom d'utilisateur à afficher dans le dialogue (obligatoire)
+.TP
+.BI --pipe= CHEMIN_FIFO
+Chemin du tuyau FIFO pour la communication des réponses (obligatoire)
+.TP
+.B --no-gui
+Mode sans interface \(en désactive l'interface graphique (optionnel)
+
+.SH CODE DE SORTIE
+.IP 0
+Le dialogue a été correctement géré et la réponse écrite au FIFO
+.IP 1
+Erreur lors de l'écriture de la réponse ou arguments manquants
+.IP >1
+Erreur du framework GUI (PySide6, D-Bus, etc.)
+
+.SH EXEMPLES
+.TP
+Afficher une confirmation pour l'utilisateur 'jean' :
+.B linux-hello-pam-confirm --username=jean --pipe=/run/linux-hello-pam/jean.fifo
+
+.TP
+Tester avec dialogue visible dans la session actuelle :
+.B DISPLAY=:0 linux-hello-pam-confirm --username=$USER --pipe=/tmp/test.fifo
+
+.SH VARIABLES D'ENVIRONNEMENT
+.TP
+.B DISPLAY
+Affichage X11 pour la sortie GUI (par exemple, \fI:0\fR, \fI:1\fR)
+.TP
+.B XDG_CURRENT_DESKTOP
+Environnement de bureau détecté (KDE, GNOME, XFCE, etc.)
+.TP
+.B HOME
+Répertoire utilisateur
+
+.SH FICHIERS
+.TP
+.I /usr/lib/linux-hello/linux-hello-pam-confirm.py
+Script auxiliaire Python
+.TP
+.I /run/linux-hello-pam/
+Répertoire d'exécution pour les tuyaux FIFO
+
+.SH VOIR AUSSI
+.BR pam_linux_hello (8),
+.BR kdialog (1),
+.BR zenity (1),
+.BR systemd-run (1)
+
+.SH AUTEUR
+Projet Linux Hello

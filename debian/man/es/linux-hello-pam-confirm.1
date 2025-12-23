@@ -1,0 +1,84 @@
+.TH LINUX-HELLO-PAM-CONFIRM 1 "December 2025" "linux-hello 1.0.0" "User Commands"
+.SH NAME
+linux-hello-pam-confirm \- GUI confirmation dialog for Linux Hello PAM authentication
+
+.SH SYNOPSIS
+.B linux-hello-pam-confirm
+.BI --username= USERNAME
+.BI --pipe= FIFO_PATH
+[\fB--no-gui\fR]
+
+.SH DESCRIPTION
+Displays a graphical confirmation dialog after successful facial recognition.
+This script is automatically launched by the PAM module and supports multiple desktop environments.
+
+.SS Desktop Environment Support
+.IP KDE
+Uses \fBkdialog\fR for native KDE dialogs if available (recommended)
+.IP GNOME/XFCE
+Falls back to \fBzenity\fR if kdialog unavailable
+.IP Generic
+Uses PySide6 GUI as final fallback
+
+.SS Desktop Notifications
+Sends D-Bus notifications at each stage:
+.IP "Recognition in progress"
+When facial recognition starts
+.IP "Confirmation received"
+When user clicks Confirm/Cancel button
+
+.SH OPTIONS
+.TP
+.BI --username= USERNAME
+Username to display in the confirmation dialog (required)
+.TP
+.BI --pipe= FIFO_PATH
+Path to FIFO pipe for response communication (required)
+.TP
+.B --no-gui
+Headless mode \(en disable GUI, use CLI only (optional)
+
+.SH EXIT STATUS
+.IP 0
+Dialog was properly handled and response written to FIFO
+.IP 1
+Error writing response or missing arguments
+.IP >1
+GUI framework error (PySide6, D-Bus, etc.)
+
+.SH EXAMPLES
+.TP
+Display confirmation for user 'john':
+.B linux-hello-pam-confirm --username=john --pipe=/run/linux-hello-pam/john.fifo
+
+.TP
+Test with dialog visible in current session:
+.B DISPLAY=:0 linux-hello-pam-confirm --username=$USER --pipe=/tmp/test.fifo
+
+.SH ENVIRONMENT
+.TP
+.B DISPLAY
+X11 display for GUI output (e.g., \fI:0\fR, \fI:1\fR)
+.TP
+.B XDG_CURRENT_DESKTOP
+Detected desktop environment (KDE, GNOME, XFCE, etc.)
+.TP
+.B HOME
+User home directory
+
+.SH FILES
+.TP
+.I /usr/lib/linux-hello/linux-hello-pam-confirm.py
+Python helper script
+.TP
+.I /run/linux-hello-pam/
+Runtime directory for FIFO pipes
+
+.SH SEE ALSO
+.BR pam_linux_hello (8),
+.BR kdialog (1),
+.BR zenity (1),
+.BR systemd-run (1)
+
+.SH AUTHOR
+Linux Hello Project

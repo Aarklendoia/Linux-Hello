@@ -36,6 +36,23 @@ const PAM_CRED_ERR: c_int = 17;
 const PAM_NO_MODULE_DATA: c_int = 18;
 const PAM_IGNORE: c_int = 25;
 
+/// Send desktop notification via D-Bus (KDE/GNOME compatible)
+fn send_notification(title: &str, message: &str) {
+    // Try sending notification (non-blocking, best effort)
+    let _ = Command::new("bash")
+        .arg("-c")
+        .arg(format!(
+            "dbus-send --session --print-reply \
+             --dest=org.freedesktop.Notifications \
+             /org/freedesktop/Notifications \
+             org.freedesktop.Notifications.Notify \
+             string:'linux-hello' uint32:0 string:'face-recognition' \
+             string:'{}' string:'{}' array:string: dict:string:variant: int32:5000 2>/dev/null || true",
+            title, message
+        ))
+        .spawn();
+}
+
 /// Log to syslog
 fn syslog(msg: &str) {
     let _ = Command::new("logger")
@@ -80,8 +97,14 @@ fn authenticate_with_daemon(username: &str) -> Result<String, String> {
     Ok(result)
 }
 
-/// Show confirmation dialog via Python helper
+/// Show confirmation dialog via Python helper with notification
 fn show_confirmation_dialog(username: &str) -> Result<bool, String> {
+    // Send "processing" notification
+    send_notification(
+        "Linux Hello",
+        &format!("Face recognition in progress for '{}'...", username)
+    );
+
     // Create config directory
     fs::create_dir_all(CONFIG_DIR)
         .map_err(|e| format!("Failed to create dir: {}", e))?;
@@ -100,11 +123,13 @@ fn show_confirmation_dialog(username: &str) -> Result<bool, String> {
         }
     }
 
-    // Launch helper via systemd-run
+    // Launch helper via systemd-run with display from user session
+    let display = std::env::var("DISPLAY").unwrap_or_else(|_| ":0".to_string());
     let output = Command::new("systemd-run")
         .arg("--user")
         .arg("--scope")
         .arg("--quiet")
+        .env("DISPLAY", display)
         .arg(format!("linux-hello-pam-confirm --username={} --pipe={}", username, pipe_file))
         .output()
         .map_err(|e| format!("Failed to launch GUI: {}", e))?;
@@ -121,13 +146,23 @@ fn show_confirmation_dialog(username: &str) -> Result<bool, String> {
     loop {
         if start.elapsed() > timeout {
             let _ = fs::remove_file(&pipe_file);
+            send_notification("Linux Hello", "Confirmation timed out - authentication cancelled");
             return Err("Timeout waiting for user".to_string());
         }
 
         match fs::read_to_string(&pipe_file) {
             Ok(response) => {
                 let _ = fs::remove_file(&pipe_file);
-                return Ok(response.trim() == "CONFIRM");
+                let confirmed = response.trim() == "CONFIRM";
+                
+                // Send result notification
+                if confirmed {
+                    send_notification("Linux Hello", "✓ Confirmation accepted");
+                } else {
+                    send_notification("Linux Hello", "✗ Confirmation cancelled");
+                }
+                
+                return Ok(confirmed);
             }
             Err(_) => {
                 std::thread::sleep(Duration::from_millis(100));
