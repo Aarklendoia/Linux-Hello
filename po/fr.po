@@ -186,3 +186,46 @@ msgstr "Enregistrer votre visage pour l'authentification."
 
 msgid "Diagnose Linux Hello installation."
 msgstr "Diagnostiquer l'installation de Linux Hello."
+
+#: pam_module/src/bin/linux-hello-pam-confirm.py
+msgid "Facial recognition successful. Confirm to proceed?"
+msgstr "Reconnaissance faciale réussie. Confirmer pour continuer ?"
+
+msgid "Linux Hello - Face Recognition"
+msgstr "Linux Hello - Reconnaissance faciale"
+
+msgid "Confirm"
+msgstr "Confirmer"
+
+msgid "Cancel"
+msgstr "Annuler"
+
+msgid "Face recognition in progress for {username}..."
+msgstr "Reconnaissance faciale en cours pour {username}…"
+
+msgid "Face Recognition Successful ✓"
+msgstr "Reconnaissance faciale réussie ✓"
+
+msgid "User '{username}' has been recognized.\n\nWould you like to proceed with authentication?"
+msgstr "L'utilisateur « {username} » a été reconnu.\n\nVoulez-vous continuer l'authentification ?"
+
+msgid "✓ Confirm"
+msgstr "✓ Confirmer"
+
+msgid "✕ Cancel"
+msgstr "✕ Annuler"
+
+msgid "Confirmation timed out - authentication cancelled"
+msgstr "La confirmation a expiré - authentification annulée"
+
+msgid "PAM confirmation dialog"
+msgstr "Dialogue de confirmation PAM"
+
+msgid "Username to display"
+msgstr "Nom d'utilisateur à afficher"
+
+msgid "FIFO path for response"
+msgstr "Chemin du FIFO pour la réponse"
+
+msgid "Headless mode (use CLI only)"
+msgstr "Mode sans interface (CLI uniquement)"

@@ -9,7 +9,24 @@ import sys
 import argparse
 import os
 import subprocess
+import locale
+import gettext
 from pathlib import Path
+
+# Setup i18n
+TEXTDOMAIN = "linux-hello"
+LOCALEDIR = "/usr/share/locale"
+
+try:
+    locale.setlocale(locale.LC_ALL, "")
+except locale.Error:
+    pass
+
+try:
+    translation = gettext.translation(TEXTDOMAIN, localedir=LOCALEDIR, fallback=True)
+    _ = translation.gettext
+except Exception:
+    _ = lambda x: x
 
 # Try D-Bus notifications (works on KDE, GNOME, etc.)
 try:
@@ -74,14 +91,14 @@ def use_kdialog(username: str, pipe_path: str) -> bool:
         # First show "processing" notification
         subprocess.run([
             'kdialog', '--passivepopup',
-            'Facial recognition successful. Confirm to proceed?',
+            _("Facial recognition successful. Confirm to proceed?"),
             '3'
         ], timeout=3, check=False)
         
         # Then show confirmation dialog
         result = subprocess.run([
             'kdialog', '--yesno',
-            f"User '{username}' recognized.\n\nConfirm to authenticate?"
+            _("User \"{username}\" recognized.\n\nConfirm to authenticate?").format(username=username)
         ], timeout=30)
         
         response = "CONFIRM" if result.returncode == 0 else "CANCEL"
@@ -98,10 +115,10 @@ def use_zenity(username: str, pipe_path: str) -> bool:
     try:
         result = subprocess.run([
             'zenity', '--question',
-            '--title=Linux Hello - Face Recognition',
-            f'--text=User "{username}" recognized.\n\nConfirm to authenticate?',
-            '--ok-label=Confirm',
-            '--cancel-label=Cancel'
+            f'--title={_("Linux Hello - Face Recognition")}',
+            f'--text={_("User \\"{username}\\" recognized.\\n\\nConfirm to authenticate?").format(username=username)}',
+            f'--ok-label={_("Confirm")}',
+            f'--cancel-label={_("Cancel")}'
         ], timeout=30)
         
         response = "CONFIRM" if result.returncode == 0 else "CANCEL"
@@ -119,25 +136,25 @@ def use_pyside6_gui(username: str, pipe_path: str):
     
     # Send notification first (in background)
     send_dbus_notification(
-        "Linux Hello",
-        f"Face recognition in progress for {username}..."
+        _("Linux Hello"),
+        _("Face recognition in progress for {username}...").format(username=username)
     )
     
     # Create confirmation dialog
     dialog = QDialog()
-    dialog.setWindowTitle("Linux Hello - Face Recognition")
+    dialog.setWindowTitle(_("Linux Hello - Face Recognition"))
     dialog.setModal(True)
     dialog.resize(450, 220)
     
     layout = QVBoxLayout()
     
     # Title
-    title = QLabel("Face Recognition Successful ✓")
+    title = QLabel(_("Face Recognition Successful ✓"))
     title.setStyleSheet("font-weight: bold; font-size: 16px; color: #27ae60;")
     layout.addWidget(title)
     
     # Info with username
-    info = QLabel(f"User '{username}' has been recognized.\n\nWould you like to proceed with authentication?")
+    info = QLabel(_("User '{username}' has been recognized.\n\nWould you like to proceed with authentication?").format(username=username))
     info.setWordWrap(True)
     info.setAlignment(Qt.AlignCenter)
     layout.addWidget(info)
@@ -148,13 +165,13 @@ def use_pyside6_gui(username: str, pipe_path: str):
     button_layout = QHBoxLayout()
     button_layout.addStretch()
     
-    confirm_btn = QPushButton("✓ Confirm")
+    confirm_btn = QPushButton(_("✓ Confirm"))
     confirm_btn.setMinimumWidth(130)
     confirm_btn.setStyleSheet("background-color: #27ae60; color: white; font-weight: bold; padding: 8px;")
     confirm_btn.clicked.connect(lambda: write_response("CONFIRM", pipe_path, dialog))
     button_layout.addWidget(confirm_btn)
     
-    cancel_btn = QPushButton("✕ Cancel")
+    cancel_btn = QPushButton(_("✕ Cancel"))
     cancel_btn.setMinimumWidth(130)
     cancel_btn.setStyleSheet("background-color: #e74c3c; color: white; font-weight: bold; padding: 8px;")
     cancel_btn.clicked.connect(lambda: write_response("CANCEL", pipe_path, dialog))
@@ -168,6 +185,7 @@ def use_pyside6_gui(username: str, pipe_path: str):
     
     # Auto-cancel after 60 seconds if no response
     def timeout_handler():
+        send_dbus_notification(_("Linux Hello"), _("Confirmation timed out - authentication cancelled"))
         write_response("CANCEL", pipe_path, dialog)
     
     timer = QTimer()

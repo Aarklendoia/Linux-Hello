@@ -87,10 +87,6 @@ override_dh_auto_install:
 	cp debian/kde-setup.sh debian/linux-hello/usr/lib/linux-hello/
 	chmod 755 debian/linux-hello/usr/lib/linux-hello/kde-setup.sh
 	
-	# Installer la documentation KDE dans /usr/share/doc/linux-hello/
-	mkdir -p debian/linux-hello/usr/share/doc/linux-hello
-	cp debian/KDE_INTEGRATION.md debian/linux-hello/usr/share/doc/linux-hello/
-	
 	# Installer les man pages pour linux-hello-pam-confirm
 	for lang in en fr de es it pt ru ja zh_CN ar; do \
 		[ -f debian/man/$${lang}/linux-hello-pam-confirm.1 ] && \
