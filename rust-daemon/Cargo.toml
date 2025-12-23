@@ -1,0 +1,21 @@
+[package]
+name = "linux-hello-daemon"
+version = "1.0.0"
+edition = "2021"
+authors = ["Linux Hello Contributors"]
+
+[dependencies]
+tokio = { version = "1.40", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+ndarray = "0.16"
+image = "0.25"
+log = "0.4"
+env_logger = "0.11"
+anyhow = "1.0"
+thiserror = "1.0"
+users = "0.11"
+
+[[bin]]
+name = "linux-hello-daemon"
+path = "src/main.rs"
