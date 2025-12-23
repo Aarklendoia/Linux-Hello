@@ -1,0 +1,16 @@
+[package]
+name = "pam_linux_hello"
+version = "1.0.0"
+edition = "2021"
+
+[lib]
+name = "pam_linux_hello"
+crate-type = ["cdylib"]
+
+[dependencies]
+libc = "0.2"
+
+[profile.release]
+lto = true
+strip = true
+opt-level = 3

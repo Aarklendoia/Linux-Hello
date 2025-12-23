@@ -20,8 +20,10 @@ echo "[linux-hello] Vérification du venv…"
 
 # 2b. Fixer les permissions du venv pour que linux-hello puisse l'utiliser
 echo "[linux-hello] Ajustement des permissions du venv…"
-chown -R linux-hello:linux-hello "$VENV"
-chmod -R u+rw,g+r,o+r "$VENV"
+if id -u linux-hello >/dev/null 2>&1; then
+    chown -R linux-hello:linux-hello "$VENV" || true
+fi
+chmod -R u+rw,g+r,o+r "$VENV" || true
 
 # 3. Installer onnxruntime si absent
 if ! "$VENV/bin/python3" -c "import onnxruntime" 2>/dev/null; then
@@ -46,24 +48,24 @@ else
     echo "[linux-hello] systemd non disponible (WSL2 ?), service non activé."
 fi
 
-# 7. Installer le module PAM
+# 7. Installer et configurer le module PAM
 echo "[linux-hello] Installation du module PAM…"
-chmod 755 /usr/lib/linux-hello/pam_linux_hello.py
-chmod 644 /etc/pam.d/linux-hello
+chmod 644 /lib/x86_64-linux-gnu/security/pam_linux_hello.so 2>/dev/null || true
+chmod 755 /usr/lib/linux-hello/linux-hello-pam-confirm.py 2>/dev/null || true
+chmod 755 /usr/lib/linux-hello/enable-pam-face-recognition.sh 2>/dev/null || true
+
+# Create PAM config directory
+mkdir -p /run/linux-hello-pam
+chmod 1777 /run/linux-hello-pam
 
 echo ""
-echo "[linux-hello] Pour activer l'authentification faciale dans PAM :"
+echo "[linux-hello] Module PAM installe!"
 echo ""
-echo "Ajoutez la ligne suivante dans le fichier PAM du service souhaité :"
-echo "    auth    sufficient    pam_exec.so quiet stdout /usr/lib/linux-hello/pam_linux_hello.py"
+echo "Pour ACTIVER la reconnaissance faciale pour un service :"
+echo "    sudo /usr/lib/linux-hello/enable-pam-face-recognition.sh sudo"
 echo ""
-echo "Exemples :"
-echo "  sudo :      /etc/pam.d/sudo"
-echo "  login TTY : /etc/pam.d/login"
-echo "  GDM :       /etc/pam.d/gdm-password"
+echo "Services disponibles : sudo, login, sshd, gdm-password"
 echo ""
-echo "Linux‑Hello n'est pas activé automatiquement afin de respecter les"
-echo "bonnes pratiques Debian concernant la configuration PAM."
+echo "ATTENTION : Testez avec 'pamtester' avant de modifier /etc/pam.d/sudo !"
+echo "    sudo pamtester sudo \$USER authenticate"
 echo ""
-
-echo "[linux-hello] Installation terminée."

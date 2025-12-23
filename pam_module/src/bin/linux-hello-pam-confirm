@@ -1,0 +1,3 @@
+#!/bin/bash
+# Wrapper for linux-hello-pam-confirm Python helper
+exec /opt/linux-hello/venv/bin/python3 /usr/lib/linux-hello/linux-hello-pam-confirm.py "$@"

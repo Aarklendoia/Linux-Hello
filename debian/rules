@@ -6,7 +6,10 @@ export SETUPTOOLS_SCM_PRETEND_VERSION=1.0.0
 	dh $@ --with python3
 
 override_dh_auto_build:
-	true
+	# Compiler le module PAM Rust
+	if [ -d pam_module ]; then \
+		cd pam_module && cargo build --release && cd ..; \
+	fi
 
 override_dh_auto_install:
 	# Compiler les traductions
@@ -65,3 +68,17 @@ override_dh_auto_install:
 		[ -f debian/man/$${lang}/linux-hello-daemon.8 ] && cp debian/man/$${lang}/linux-hello-daemon.8 debian/linux-hello/usr/share/man/$${lang}/man8/ || true; \
 		[ -f debian/man/$${lang}/pam_linux_hello.8 ] && cp debian/man/$${lang}/pam_linux_hello.8 debian/linux-hello/usr/share/man/$${lang}/man8/ || true; \
 	done
+	
+	# Installer le module PAM compilé
+	if [ -f pam_module/target/release/libpam_linux_hello.so ]; then \
+		mkdir -p debian/linux-hello/lib/x86_64-linux-gnu/security; \
+		cp pam_module/target/release/libpam_linux_hello.so debian/linux-hello/lib/x86_64-linux-gnu/security/pam_linux_hello.so; \
+		strip debian/linux-hello/lib/x86_64-linux-gnu/security/pam_linux_hello.so || true; \
+	fi
+	
+	# Installer les helpers et scripts PAM
+	mkdir -p debian/linux-hello/usr/lib/linux-hello
+	cp pam_module/src/bin/linux-hello-pam-confirm.py debian/linux-hello/usr/lib/linux-hello/
+	chmod 755 debian/linux-hello/usr/lib/linux-hello/linux-hello-pam-confirm.py
+	cp debian/enable-pam-face-recognition.sh debian/linux-hello/usr/lib/linux-hello/
+	chmod 755 debian/linux-hello/usr/lib/linux-hello/enable-pam-face-recognition.sh
