@@ -22,7 +22,7 @@ async fn main() -> Result<()> {
 
     // Initialize ONNX runtime for embeddings
     let _embeddings = embeddings::Embeddings::new(&config)?;
-    info!("ONNX model loaded");
+    info!("Embeddings engine initialized");
 
     // Check camera availability
     if let Err(e) = camera::Camera::test() {
