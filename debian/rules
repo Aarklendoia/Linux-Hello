@@ -78,6 +78,12 @@ override_dh_auto_install:
 	
 	# Installer les helpers et scripts PAM
 	mkdir -p debian/linux-hello/usr/lib/linux-hello
+	cp usr/lib/linux-hello/pam_linux_hello.py debian/linux-hello/usr/lib/linux-hello/
+	chmod 755 debian/linux-hello/usr/lib/linux-hello/pam_linux_hello.py
+	cp usr/lib/linux-hello/doctor.sh debian/linux-hello/usr/lib/linux-hello/
+	chmod 755 debian/linux-hello/usr/lib/linux-hello/doctor.sh
+	cp usr/lib/linux-hello/repair_venv.sh debian/linux-hello/usr/lib/linux-hello/
+	chmod 755 debian/linux-hello/usr/lib/linux-hello/repair_venv.sh
 	cp pam_module/src/bin/linux-hello-pam-confirm.py debian/linux-hello/usr/lib/linux-hello/
 	chmod 755 debian/linux-hello/usr/lib/linux-hello/linux-hello-pam-confirm.py
 	cp debian/enable-pam-face-recognition.sh debian/linux-hello/usr/lib/linux-hello/

@@ -2,18 +2,32 @@
 
 import socket
 import sys
+import os
 
-SOCKET_PATH = "/var/run/linux-hello.sock"
+SOCKET_PATH = "/run/linux-hello/daemon.sock"
 
-def send_auth():
+def send_auth(username=None):
     try:
         client = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         client.connect(SOCKET_PATH)
-        client.send(b"AUTH")
+        
+        # Get username from PAM_USER environment variable or argument
+        if username is None:
+            username = os.environ.get('PAM_USER')
+        if username is None and len(sys.argv) > 1:
+            username = sys.argv[1]
+        
+        # Send AUTH request with username
+        if username:
+            msg = f"AUTH:{username}".encode()
+        else:
+            msg = b"AUTH"
+        
+        client.send(msg)
         result = client.recv(1024).decode().strip()
         client.close()
         return result
-    except Exception:
+    except Exception as e:
         return "ERROR"
 
 def main():

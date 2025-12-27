@@ -22,6 +22,8 @@ echo "[linux-hello] Vérification du venv…"
 echo "[linux-hello] Ajustement des permissions du venv…"
 if id -u linux-hello >/dev/null 2>&1; then
     chown -R linux-hello:linux-hello "$VENV" || true
+    # Ajouter linux-hello au groupe video pour accéder à la caméra
+    usermod -aG video linux-hello || true
 fi
 chmod -R u+rw,g+r,o+r "$VENV" || true
 
@@ -51,12 +53,31 @@ fi
 # 7. Installer et configurer le module PAM
 echo "[linux-hello] Installation du module PAM…"
 chmod 644 /lib/x86_64-linux-gnu/security/pam_linux_hello.so 2>/dev/null || true
+chmod 755 /usr/lib/linux-hello/pam_linux_hello.py 2>/dev/null || true
 chmod 755 /usr/lib/linux-hello/linux-hello-pam-confirm.py 2>/dev/null || true
 chmod 755 /usr/lib/linux-hello/enable-pam-face-recognition.sh 2>/dev/null || true
+chmod 755 /usr/lib/linux-hello/doctor.sh 2>/dev/null || true
+chmod 755 /usr/lib/linux-hello/repair_venv.sh 2>/dev/null || true
 
 # Create PAM config directory
 mkdir -p /run/linux-hello-pam
 chmod 1777 /run/linux-hello-pam
+
+# 8. Configurer les permissions pour les fichiers d'embedding utilisateur
+# Cette fonction sera appelée lors de la première authentification
+# mais nous l'initialisons ici avec les permissions correctes
+if [ -n "$SUDO_USER" ]; then
+    # Si l'installation se fait via sudo, configurer pour cet utilisateur
+    user_home=$(eval echo ~$SUDO_USER)
+    user_faces_dir="$user_home/.linux-hello/faces"
+    mkdir -p "$user_faces_dir"
+    # Permissions pour que linux-hello puisse lire les embeddings
+    # mais que seul l'utilisateur puisse les modifier
+    chmod 750 "$user_home/.linux-hello" 2>/dev/null || true
+    chmod 750 "$user_faces_dir" 2>/dev/null || true
+    chown "$SUDO_USER:$SUDO_USER" "$user_home/.linux-hello" 2>/dev/null || true
+    chown "$SUDO_USER:$SUDO_USER" "$user_faces_dir" 2>/dev/null || true
+fi
 
 echo ""
 echo "[linux-hello] Module PAM installe!"

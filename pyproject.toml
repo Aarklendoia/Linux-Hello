@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools_scm]
 write_to = "src/linux_hello/_version.py"
-version_scheme = "guess-next-simple"
+version_scheme = "post-release"
 fallback_version = "1.0.0"
 
 [project]

@@ -25,7 +25,6 @@ def enroll():
     # Set group ownership to linux-hello for access by daemon
     try:
         import grp
-        linux_hello_gid = grp.getgrall()
         for group in grp.getgrall():
             if group.gr_name == "linux-hello":
                 os.chown(faces_dir, -1, group.gr_gid)
