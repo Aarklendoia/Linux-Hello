@@ -16,6 +16,7 @@ pub mod storage;
 pub mod camera;
 pub mod matcher;
 pub mod dbus;
+pub mod pam_helper;
 
 use dbus_interface::{DeleteFaceRequest, RegisterFaceRequest, VerifyRequest, VerifyResult};
 use storage::FaceStorage;

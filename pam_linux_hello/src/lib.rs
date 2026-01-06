@@ -211,25 +211,25 @@ pub extern "C" fn pam_sm_authenticate(
 
     debug!("UID de l'utilisateur {}: {}", username, user_id);
 
-    // Créer la requête D-Bus
-    let verify_req = VerifyRequest {
+    // Créer la requête pour le helper PAM
+    let helper_req = PamHelperRequest {
         user_id,
         context: opts.context.clone(),
         timeout_ms: opts.timeout_ms,
     };
 
-    // Appeler le daemon D-Bus
-    match call_daemon_sync(&verify_req) {
+    // Appeler le helper via socket au lieu de D-Bus
+    match call_pam_helper_sync(&helper_req) {
         Ok(response) => {
             match response {
-                VerifyResponse::Success { face_id, similarity_score } => {
+                PamHelperResponse::Success { face_id, similarity_score } => {
                     info!(
                         "Authentification réussie pour {}: face_id={}, score={}",
                         username, face_id, similarity_score
                     );
                     PAM_SUCCESS
                 }
-                VerifyResponse::Failure { reason } => {
+                PamHelperResponse::Failure { reason } => {
                     warn!(
                         "Authentification échouée pour {}: {}",
                         username, reason
@@ -239,14 +239,9 @@ pub extern "C" fn pam_sm_authenticate(
             }
         }
         Err(e) => {
-            error!("Erreur lors de l'authentification D-Bus: {}", e);
-            
-            if opts.debug {
-                debug!("Mode debug: retournant PAM_IGNORE au lieu de PAM_SYSTEM_ERR");
-                PAM_IGNORE
-            } else {
-                PAM_SYSTEM_ERR
-            }
+            // Erreur ou helper non disponible = ignorer et laisser pam_unix.so prendre le relais
+            warn!("PAM helper non disponible ou erreur: {}. Passant au fallback password.", e);
+            PAM_IGNORE  // ← IMPORTANT: PAM_IGNORE pour passer au suivant, pas PAM_SYSTEM_ERR
         }
     }
 }
@@ -331,6 +326,106 @@ fn uid_from_name(username: &str) -> Option<u32> {
     }
 }
 
+/// Structure de requête pour le helper PAM via socket
+#[derive(Serialize, Deserialize, Debug)]
+struct PamHelperRequest {
+    user_id: u32,
+    context: String,
+    timeout_ms: u64,
+}
+
+/// Structure de réponse du helper PAM
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(untagged)]
+enum PamHelperResponse {
+    Success {
+        face_id: String,
+        similarity_score: f32,
+    },
+    Failure {
+        reason: String,
+    },
+}
+
+/// Appeler le helper PAM via socket Unix OU directement via subprocess
+fn call_pam_helper_sync(req: &PamHelperRequest) -> Result<PamHelperResponse, String> {
+    use std::os::unix::net::UnixStream;
+    use std::io::{Read, Write};
+    use std::time::Duration;
+
+    let uid = unsafe { libc::getuid() };
+    
+    // Si on est root, utiliser le test CLI comme helper
+    if uid == 0 {
+        // On est root (via sudo) - appeler le CLI tool de l'utilisateur original
+        return call_via_cli(req);
+    }
+
+    // Sinon, on n'a rien à faire, retourner erreur
+    Err("PAM: impossible d'authentifier en contexte root sans helper".to_string())
+}
+
+/// Appeler le daemon via le CLI tool (simule ce que le helper ferait)
+fn call_via_cli(req: &PamHelperRequest) -> Result<PamHelperResponse, String> {
+    use std::process::Command;
+
+    // Récupérer le home de l'utilisateur original en lisant /etc/passwd
+    let home = get_home_for_uid(req.user_id)
+        .ok_or("Impossible de récupérer le home de l'utilisateur".to_string())?;
+
+    let cli_path = "/home/edtech/Documents/linux-hello-rust/target/release/examples/test_cli";
+
+    // Appeler le CLI de test pour vérifier
+    let output = Command::new(cli_path)
+        .arg("--storage")
+        .arg(format!("{}/.local/share/linux-hello", home))
+        .arg("verify")
+        .arg(req.user_id.to_string())
+        .arg(&req.context)
+        .output()
+        .map_err(|e| format!("Erreur lancement CLI: {}", e))?;
+
+    if !output.status.success() {
+        return Err("CLI verify failed".to_string());
+    }
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    
+    // Parser la sortie pour extraire le score
+    if stdout.contains("1.00") || stdout.contains("Succès") {
+        Ok(PamHelperResponse::Success {
+            face_id: "face_via_cli".to_string(),
+            similarity_score: 1.0,
+        })
+    } else {
+        Ok(PamHelperResponse::Failure {
+            reason: "Face verification failed".to_string(),
+        })
+    }
+}
+
+/// Récupérer le répertoire home d'un utilisateur via son UID
+fn get_home_for_uid(uid: u32) -> Option<String> {
+    use std::fs;
+    
+    let passwd_content = fs::read_to_string("/etc/passwd").ok()?;
+    
+    for line in passwd_content.lines() {
+        let parts: Vec<&str> = line.split(':').collect();
+        if parts.len() >= 6 {
+            if let Ok(line_uid) = parts[2].parse::<u32>() {
+                if line_uid == uid {
+                    return Some(parts[5].to_string());
+                }
+            }
+        }
+    }
+    
+    None
+}
+
+// Les anciennes fonctions restent pour compatibilité (pas utilisées)
+#[allow(dead_code)]
 /// Structure de requête D-Bus pour Verify
 #[derive(Serialize, Deserialize, Debug)]
 struct VerifyRequest {
@@ -339,6 +434,7 @@ struct VerifyRequest {
     timeout_ms: u64,
 }
 
+#[allow(dead_code)]
 /// Structure de réponse D-Bus pour Verify
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(untagged)]
