@@ -3,9 +3,9 @@
 //! Lance le service D-Bus pour gestion des visages
 
 use clap::Parser;
-use hello_daemon::{DaemonConfig, FaceAuthDaemon};
+use hello_daemon::{DaemonConfig, FaceAuthDaemon, dbus::FaceAuthInterface};
 use std::path::PathBuf;
-use tracing::{info, warn};
+use tracing::{info, warn, error};
 
 #[derive(Parser, Debug)]
 #[command(name = "hello-daemon")]
@@ -60,11 +60,37 @@ async fn main() -> anyhow::Result<()> {
         warn!("Mode user - accessible uniquement pour l'utilisateur courant");
     }
 
-    // TODO: Se connecter à D-Bus et exposer l'interface
-    info!("D-Bus interface non implémentée yet");
-    info!("À faire: com.linuxhello.FaceAuth");
+    // Enregistrer sur D-Bus
+    info!("Enregistrement sur D-Bus...");
+    let iface = FaceAuthInterface::new(daemon);
+
+    let connection = zbus::Connection::session().await
+        .map_err(|e| {
+            error!("Erreur connexion D-Bus: {}", e);
+            e
+        })?;
+
+    let _request_name_reply = connection.request_name("com.linuxhello.FaceAuth").await
+        .map_err(|e| {
+            error!("Erreur enregistrement D-Bus name: {}", e);
+            e
+        })?;
+
+    connection
+        .object_server()
+        .at("/com/linuxhello/FaceAuth", iface)
+        .await
+        .map_err(|e| {
+            error!("Erreur enregistrement objet D-Bus: {}", e);
+            e
+        })?;
+
+    info!("✓ Service D-Bus enregistré: com.linuxhello.FaceAuth");
+    info!("  Interface: /com/linuxhello/FaceAuth");
+    info!("  Méthodes: register_face, verify, delete_face, list_faces, ping");
 
     // Garder le daemon actif indéfiniment
+    info!("Daemon prêt. Appuyez sur Ctrl+C pour arrêter.");
     tokio::signal::ctrl_c().await?;
     info!("Arrêt du daemon");
 
