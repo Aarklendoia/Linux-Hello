@@ -4,13 +4,22 @@
 //! - Stockage des embeddings faciales
 //! - Interface D-Bus pour enregistrement/vérification
 //! - Accès caméra
+//! - Matching et scoring
 
 use std::path::PathBuf;
+use std::sync::Arc;
 use thiserror::Error;
+use tracing::info;
 
 pub mod dbus_interface;
+pub mod storage;
+pub mod camera;
+pub mod matcher;
 
 use dbus_interface::{DeleteFaceRequest, RegisterFaceRequest, VerifyRequest, VerifyResult};
+use storage::FaceStorage;
+use camera::CameraManager;
+use matcher::FaceMatcher;
 
 /// Erreurs du daemon
 #[derive(Debug, Error)]
@@ -29,6 +38,9 @@ pub enum DaemonError {
 
     #[error("D-Bus error: {0}")]
     DbusError(String),
+
+    #[error("Caméra: {0}")]
+    CameraError(String),
 
     #[error("I/O error: {0}")]
     IoError(#[from] std::io::Error),
@@ -101,51 +113,191 @@ pub struct FaceRecord {
     pub context: String,
 }
 
-/// Impl du service D-Bus
+/// Impl du service D-Bus avec tous les composants
 pub struct FaceAuthDaemon {
     config: DaemonConfig,
-    // À ajouter: storage manager, camera manager, etc.
+    storage: Arc<FaceStorage>,
+    camera: Arc<CameraManager>,
+    matcher: Arc<FaceMatcher>,
 }
 
 impl FaceAuthDaemon {
     pub fn new(config: DaemonConfig) -> Result<Self, DaemonError> {
-        // Créer les répertoires nécessaires
-        std::fs::create_dir_all(&config.storage_path)
+        // Créer le storage
+        let storage = FaceStorage::new(&config.storage_path)
             .map_err(|e| DaemonError::StorageError(e.to_string()))?;
 
-        Ok(Self { config })
+        // Créer le camera manager
+        let camera = CameraManager::new(5000); // 5s timeout par défaut
+
+        // Créer le matcher avec seuil de config
+        let matcher = FaceMatcher::new(config.default_similarity_threshold);
+
+        info!("Daemon créé avec config: {:?}", config);
+
+        Ok(Self {
+            config,
+            storage: Arc::new(storage),
+            camera: Arc::new(camera),
+            matcher: Arc::new(matcher),
+        })
     }
 
     pub async fn register_face(
         &self,
         request: RegisterFaceRequest,
     ) -> Result<String, DaemonError> {
-        // Vérifier permissions: seul l'utilisateur ou root peut enregistrer son propre visage
+        // Vérifier permissions
         self.check_user_permission(request.user_id)?;
 
-        // TODO: Implémenter capture caméra + extraction embedding
-        Err(DaemonError::StorageError(
-            "Non implémenté".to_string(),
-        ))
+        info!(
+            "Enregistrement de visage pour user_id={}, context={}",
+            request.user_id, request.context
+        );
+
+        // Capturer des frames
+        let capture = self
+            .camera
+            .capture_frames(request.num_samples, request.timeout_ms)
+            .await
+            .map_err(|e| DaemonError::CameraError(e.to_string()))?;
+
+        // Sélectionner la meilleure embedding (pour MVP: la première)
+        let embedding = capture.embeddings.first().ok_or(
+            DaemonError::CameraError("Aucune frame capturée".to_string()),
+        )?;
+
+        // Générer un ID unique pour ce visage
+        use std::time::{SystemTime, UNIX_EPOCH};
+        let now = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_secs();
+        let face_id = format!("face_{}_{}", request.user_id, now);
+
+        // Créer le record
+        let record = FaceRecord {
+            face_id: face_id.clone(),
+            user_id: request.user_id,
+            embedding_json: serde_json::to_string(&embedding.vector)?,
+            quality_score: capture.quality_score,
+            registered_at: now,
+            context: request.context.clone(),
+        };
+
+        // Sauvegarder
+        self.storage
+            .save_face(&record, embedding)
+            .map_err(|e| DaemonError::StorageError(e.to_string()))?;
+
+        info!("Visage enregistré: face_id={}", face_id);
+
+        // Retourner le JSON de réponse
+        let response = dbus_interface::RegisterFaceResponse {
+            face_id,
+            registered_at: now,
+            quality_score: capture.quality_score,
+        };
+
+        Ok(serde_json::to_string(&response)?)
     }
 
     pub async fn delete_face(&self, request: DeleteFaceRequest) -> Result<(), DaemonError> {
         self.check_user_permission(request.user_id)?;
 
-        // TODO: Implémenter suppression
-        Err(DaemonError::StorageError(
-            "Non implémenté".to_string(),
-        ))
+        info!(
+            "Suppression visage pour user_id={}, face_id={:?}",
+            request.user_id, request.face_id
+        );
+
+        match request.face_id {
+            Some(face_id) => {
+                self.storage
+                    .delete_face(request.user_id, &face_id)
+                    .map_err(|e| DaemonError::StorageError(e.to_string()))?;
+            }
+            None => {
+                self.storage
+                    .delete_all_faces(request.user_id)
+                    .map_err(|e| DaemonError::StorageError(e.to_string()))?;
+            }
+        }
+
+        Ok(())
     }
 
     pub async fn verify(&self, request: VerifyRequest) -> Result<VerifyResult, DaemonError> {
-        // Vérifier permissions: tout utilisateur peut vérifier son propre visage
+        // Vérifier permissions
         self.check_user_permission(request.user_id)?;
 
-        // TODO: Implémenter vérification
-        Ok(VerifyResult::Error {
-            message: "Non implémenté".to_string(),
-        })
+        info!(
+            "Vérification pour user_id={}, context={}",
+            request.user_id, request.context
+        );
+
+        // Charger les visages enregistrés
+        let faces = self
+            .storage
+            .list_user_faces(request.user_id)
+            .map_err(|e| DaemonError::StorageError(e.to_string()))?;
+
+        if faces.is_empty() {
+            info!("Aucun visage enregistré pour user_id={}", request.user_id);
+            return Ok(VerifyResult::NoEnrollment);
+        }
+
+        // Capturer une frame
+        let capture = self
+            .camera
+            .capture_frames(1, request.timeout_ms)
+            .await
+            .map_err(|e| DaemonError::CameraError(e.to_string()))?;
+
+        let probe = capture.embeddings.first().ok_or(
+            DaemonError::CameraError("Aucune frame capturée".to_string()),
+        )?;
+
+        // Charger les embeddings stockés
+        let mut stored_embeddings = std::collections::HashMap::new();
+        for face in &faces {
+            let embedding = self
+                .storage
+                .load_face_embedding(request.user_id, &face.face_id)
+                .map_err(|e| DaemonError::StorageError(e.to_string()))?;
+            stored_embeddings.insert(face.face_id.clone(), embedding);
+        }
+
+        // Matcher
+        let match_result = self.matcher.match_embedding(
+            probe,
+            &stored_embeddings,
+            &request.context,
+        );
+
+        if match_result.matched {
+            Ok(VerifyResult::Success {
+                face_id: match_result.face_id.unwrap(),
+                similarity_score: match_result.best_score,
+            })
+        } else if match_result.best_score > 0.0 {
+            Ok(VerifyResult::NoMatch {
+                best_score: match_result.best_score,
+                threshold: match_result.threshold,
+            })
+        } else {
+            Ok(VerifyResult::NoFaceDetected)
+        }
+    }
+
+    pub async fn list_faces(&self, user_id: u32) -> Result<String, DaemonError> {
+        self.check_user_permission(user_id)?;
+
+        let faces = self
+            .storage
+            .list_user_faces(user_id)
+            .map_err(|e| DaemonError::StorageError(e.to_string()))?;
+
+        Ok(serde_json::to_string(&faces)?)
     }
 
     /// Vérifier que l'utilisateur courant a le droit d'accéder à cet UID
@@ -163,13 +315,17 @@ impl FaceAuthDaemon {
         }
 
         Err(DaemonError::AccessDenied(format!(
-            "UID {} peut pas accéder à UID {}",
+            "UID {} ne peut pas accéder à UID {}",
             current_uid, target_uid
         )))
     }
 
     pub fn config(&self) -> &DaemonConfig {
         &self.config
+    }
+
+    pub fn is_camera_available(&self) -> bool {
+        self.camera.is_available()
     }
 }
 
