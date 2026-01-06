@@ -3,9 +3,9 @@
 //! Lance le service D-Bus pour gestion des visages
 
 use clap::Parser;
-use hello_daemon::{DaemonConfig, FaceAuthDaemon, dbus::FaceAuthInterface};
+use hello_daemon::{dbus::FaceAuthInterface, DaemonConfig, FaceAuthDaemon};
 use std::path::PathBuf;
-use tracing::{info, warn, error};
+use tracing::{error, info, warn};
 
 #[derive(Parser, Debug)]
 #[command(name = "hello-daemon")]
@@ -64,13 +64,14 @@ async fn main() -> anyhow::Result<()> {
     info!("Enregistrement sur D-Bus...");
     let iface = FaceAuthInterface::new(daemon);
 
-    let connection = zbus::Connection::session().await
-        .map_err(|e| {
-            error!("Erreur connexion D-Bus: {}", e);
-            e
-        })?;
+    let connection = zbus::Connection::session().await.map_err(|e| {
+        error!("Erreur connexion D-Bus: {}", e);
+        e
+    })?;
 
-    let _request_name_reply = connection.request_name("com.linuxhello.FaceAuth").await
+    let _ = connection
+        .request_name("com.linuxhello.FaceAuth")
+        .await
         .map_err(|e| {
             error!("Erreur enregistrement D-Bus name: {}", e);
             e

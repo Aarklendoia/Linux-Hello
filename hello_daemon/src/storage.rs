@@ -5,7 +5,6 @@
 
 use crate::{DaemonError, FaceRecord};
 use hello_face_core::Embedding;
-use serde_json::json;
 use std::path::{Path, PathBuf};
 use tracing::{debug, info};
 
@@ -15,6 +14,7 @@ pub struct FaceStorage {
     base_path: PathBuf,
 
     /// Chemin vers la DB SQLite
+    #[allow(dead_code)]
     db_path: PathBuf,
 }
 
@@ -61,7 +61,7 @@ impl FaceStorage {
         // Sauvegarder métadonnées dans un fichier JSON
         let metadata_path = user_dir.join(format!("{}.meta.json", record.face_id));
         let metadata_json = serde_json::to_string_pretty(&record)
-            .map_err(|e| DaemonError::JsonError(e))?;
+            .map_err(DaemonError::JsonError)?;
 
         std::fs::write(&metadata_path, metadata_json)
             .map_err(|e| DaemonError::StorageError(format!("Écriture métadonnées: {}", e)))?;
@@ -69,7 +69,7 @@ impl FaceStorage {
         // Sauvegarder embedding
         let embedding_path = user_dir.join(format!("{}.embedding.json", record.face_id));
         let embedding_json = serde_json::to_string_pretty(&embedding)
-            .map_err(|e| DaemonError::JsonError(e))?;
+            .map_err(DaemonError::JsonError)?;
 
         std::fs::write(&embedding_path, embedding_json)
             .map_err(|e| DaemonError::StorageError(format!("Écriture embedding: {}", e)))?;
@@ -95,7 +95,7 @@ impl FaceStorage {
             .map_err(|e| DaemonError::StorageError(format!("Lecture embedding: {}", e)))?;
 
         let embedding: hello_face_core::Embedding = serde_json::from_str(&content)
-            .map_err(|e| DaemonError::JsonError(e))?;
+            .map_err(DaemonError::JsonError)?;
 
         Ok(embedding)
     }
@@ -128,7 +128,7 @@ impl FaceStorage {
                     .map_err(|e| DaemonError::StorageError(format!("Lecture meta: {}", e)))?;
 
                 let record: FaceRecord = serde_json::from_str(&content)
-                    .map_err(|e| DaemonError::JsonError(e))?;
+                    .map_err(DaemonError::JsonError)?;
 
                 faces.push(record);
             }
@@ -214,13 +214,12 @@ impl FaceStorage {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::fs;
     use tempfile::TempDir;
 
     #[test]
     fn test_storage_init() {
         let temp = TempDir::new().unwrap();
-        let storage = FaceStorage::new(temp.path()).unwrap();
+        let _ = FaceStorage::new(temp.path()).unwrap();
 
         assert!(temp.path().join("embeddings").exists());
     }

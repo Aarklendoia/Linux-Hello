@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 use std::ffi::CStr;
 use std::fs::OpenOptions;
 use std::io::Write;
-use std::os::raw::{c_char, c_int, c_void};
+use std::os::raw::{c_char, c_int};
 use std::os::unix::fs::OpenOptionsExt;
 use std::time::{SystemTime, UNIX_EPOCH};
 use tracing::{debug, info, warn};
@@ -25,22 +25,15 @@ pub struct PamHandle {
 }
 
 extern "C" {
-    fn pam_get_item(pamh: *mut PamHandle, item_type: c_int, item: *mut *const c_void) -> c_int;
-
     fn pam_get_user(pamh: *mut PamHandle, user: *mut *const c_char, prompt: *const c_char)
         -> c_int;
 }
 
 // Constantes PAM
 const PAM_SUCCESS: c_int = 0;
-const PAM_USER: c_int = 2;
-const PAM_AUTHTOK: c_int = 6;
-const PAM_RHOST: c_int = 7;
-const PAM_CONV: c_int = 3;
 
 // Retcodes
 const PAM_AUTH_ERR: c_int = 7;
-const PAM_SYSTEM_ERR: c_int = 4;
 const PAM_IGNORE: c_int = 25;
 
 /// Options du module PAM
@@ -143,6 +136,7 @@ fn _pam_conv_send(
 /// PAM_AUTH_ERR si authentification échouée
 /// PAM_IGNORE si le module ne peut pas authentifier (laisser continuer)
 #[allow(non_snake_case)]
+#[allow(unsafe_op_in_unsafe_fn)]
 #[no_mangle]
 pub extern "C" fn pam_sm_authenticate(
     pamh: *mut PamHandle,
@@ -153,7 +147,7 @@ pub extern "C" fn pam_sm_authenticate(
     // Initialiser tracing pour ce thread
     let _ = tracing_subscriber::fmt()
         .with_max_level(tracing::Level::DEBUG)
-        .with_writer(|| std::io::stderr())
+        .with_writer(std::io::stderr)
         .try_init();
 
     debug!("pam_sm_authenticate appelé");
@@ -412,13 +406,10 @@ fn call_via_cli(req: &PamHelperRequest) -> Result<PamHelperResponse, String> {
     log_pam(&format!(
         "call_via_cli status={} stdout={}",
         output.status,
-        format!(
-            "{}",
-            String::from_utf8_lossy(&output.stdout)
-                .lines()
-                .next()
-                .unwrap_or("")
-        )
+        String::from_utf8_lossy(&output.stdout)
+            .lines()
+            .next()
+            .unwrap_or("")
     ));
 
     if !output.status.success() {
@@ -478,7 +469,7 @@ fn log_pam(message: &str) {
     {
         Ok(f) => f,
         Err(e) => {
-            let _ = eprintln!("pam log failed: {}", e);
+            eprintln!("pam log failed: {}", e);
             return;
         }
     };
@@ -507,51 +498,6 @@ enum VerifyResponse {
     Failure {
         reason: String,
     },
-}
-
-/// Appeler le daemon D-Bus de manière synchrone
-async fn call_daemon_verify(req: &VerifyRequest) -> Result<VerifyResponse, String> {
-    // Connexion au D-Bus session
-    let connection = zbus::Connection::session()
-        .await
-        .map_err(|e| format!("Erreur connexion D-Bus: {}", e))?;
-
-    // Sérialiser la requête en JSON
-    let request_json =
-        serde_json::to_string(req).map_err(|e| format!("Erreur sérialisation JSON: {}", e))?;
-
-    // Appeler directement via introspection
-    let response_value = connection
-        .call_method(
-            Some("com.linuxhello.FaceAuth"),
-            "/com/linuxhello/FaceAuth",
-            Some("com.linuxhello.FaceAuth"),
-            "Verify",
-            &(request_json,),
-        )
-        .await
-        .map_err(|e| format!("Erreur appel D-Bus Verify: {}", e))?;
-
-    // Extraire la réponse
-    let response_json: String = response_value
-        .body()
-        .deserialize()
-        .map_err(|e| format!("Erreur extraction réponse D-Bus: {}", e))?;
-
-    // Déserialiser la réponse
-    let response: VerifyResponse = serde_json::from_str(&response_json)
-        .map_err(|e| format!("Erreur désérialisation réponse: {}", e))?;
-
-    Ok(response)
-}
-
-/// Wrapper synchrone pour l'appel async D-Bus
-fn call_daemon_sync(req: &VerifyRequest) -> Result<VerifyResponse, String> {
-    // Créer un runtime tokio pour cette opération
-    let rt = tokio::runtime::Runtime::new()
-        .map_err(|e| format!("Erreur création runtime tokio: {}", e))?;
-
-    rt.block_on(call_daemon_verify(req))
 }
 
 // Test

@@ -2,14 +2,12 @@
 //!
 //! Wrapper qui expose les opérations du daemon via D-Bus
 
-use crate::{DaemonConfig, FaceAuthDaemon};
-use crate::dbus_interface::{
-    DeleteFaceRequest, RegisterFaceRequest, VerifyRequest,
-};
+use crate::dbus_interface::{DeleteFaceRequest, RegisterFaceRequest, VerifyRequest};
+use crate::FaceAuthDaemon;
 use std::sync::Arc;
-use tracing::{debug, info, error};
-use zbus::dbus_interface;
 use tokio::sync::RwLock;
+use tracing::{debug, error, info};
+use zbus::interface;
 
 /// Wrapper D-Bus autour du daemon
 pub struct FaceAuthInterface {
@@ -29,7 +27,7 @@ impl FaceAuthInterface {
     }
 }
 
-#[dbus_interface(name = "com.linuxhello.FaceAuth")]
+#[interface(name = "com.linuxhello.FaceAuth")]
 impl FaceAuthInterface {
     /// Enregistrer un nouveau visage pour un utilisateur
     ///
@@ -165,13 +163,13 @@ impl FaceAuthInterface {
     }
 
     /// Version du daemon
-    #[dbus_interface(property)]
+    #[zbus(property)]
     pub fn version(&self) -> String {
         self.version.clone()
     }
 
     /// Vérifier si une caméra est disponible
-    #[dbus_interface(property)]
+    #[zbus(property)]
     pub fn camera_available(&self) -> bool {
         // On utilise try_read pour ne pas bloquer
         // En cas d'erreur, on suppose que c'est disponible
@@ -182,7 +180,7 @@ impl FaceAuthInterface {
     }
 
     /// Mode root ou user
-    #[dbus_interface(property)]
+    #[zbus(property)]
     pub fn root_mode(&self) -> bool {
         self.daemon
             .try_read()
@@ -191,7 +189,7 @@ impl FaceAuthInterface {
     }
 
     /// Chemin de stockage
-    #[dbus_interface(property)]
+    #[zbus(property)]
     pub fn storage_path(&self) -> String {
         self.storage_path.clone()
     }

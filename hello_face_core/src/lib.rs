@@ -231,7 +231,7 @@ pub mod simple_implementation {
     impl FaceDetector for SimpleDetector {
         fn detect(
             &self,
-            frame_data: &[u8],
+            _frame_data: &[u8],
             width: u32,
             height: u32,
             _channels: u32,
@@ -270,7 +270,7 @@ pub mod simple_implementation {
             face_region: &FaceRegion,
             frame_data: &[u8],
             width: u32,
-            _height: u32,
+            height: u32,
             channels: u32,
         ) -> Result<Embedding, FaceError> {
             let (x, y, w, h) = face_region.bounding_box;
@@ -280,7 +280,7 @@ pub mod simple_implementation {
             let mut hist_g = [0u32; 32];
             let mut hist_b = [0u32; 32];
 
-            for py in y..std::cmp::min(y + h, _height) {
+            for py in y..std::cmp::min(y + h, height) {
                 for px in x..std::cmp::min(x + w, width) {
                     let idx = ((py * width + px) * channels) as usize;
                     if idx + 2 < frame_data.len() {

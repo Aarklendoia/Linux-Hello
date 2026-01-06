@@ -257,7 +257,7 @@ pub mod v4l2_backend {
 pub fn create_camera(config: CameraConfig) -> Result<Box<dyn CameraBackend>, CameraError> {
     #[cfg(feature = "v4l2")]
     {
-        return Ok(Box::new(v4l2_backend::V4L2Camera::new(config)));
+        Ok(Box::new(v4l2_backend::V4L2Camera::new(config)))
     }
 
     #[cfg(not(feature = "v4l2"))]

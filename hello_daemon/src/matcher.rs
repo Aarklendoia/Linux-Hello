@@ -143,7 +143,7 @@ impl FaceMatcher {
             return 0.0;
         }
 
-        (dot_product / (norm_a * norm_b)).max(0.0).min(1.0)
+        (dot_product / (norm_a * norm_b)).clamp(0.0, 1.0)
     }
 }
 

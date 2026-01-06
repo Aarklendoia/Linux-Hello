@@ -11,17 +11,17 @@ use std::sync::Arc;
 use thiserror::Error;
 use tracing::info;
 
-pub mod dbus_interface;
-pub mod storage;
 pub mod camera;
-pub mod matcher;
 pub mod dbus;
+pub mod dbus_interface;
+pub mod matcher;
 pub mod pam_helper;
+pub mod storage;
 
-use dbus_interface::{DeleteFaceRequest, RegisterFaceRequest, VerifyRequest, VerifyResult};
-use storage::FaceStorage;
 use camera::CameraManager;
+use dbus_interface::{DeleteFaceRequest, RegisterFaceRequest, VerifyRequest, VerifyResult};
 use matcher::FaceMatcher;
+use storage::FaceStorage;
 
 /// Erreurs du daemon
 #[derive(Debug, Error)]
@@ -77,10 +77,8 @@ impl Default for DaemonConfig {
             PathBuf::from("/var/lib/linux-hello")
         } else {
             // Mode user: ~/.local/share/linux-hello/
-            let home = std::env::var("HOME")
-                .unwrap_or_else(|_| ".".to_string());
-            PathBuf::from(home)
-                .join(".local/share/linux-hello")
+            let home = std::env::var("HOME").unwrap_or_else(|_| ".".to_string());
+            PathBuf::from(home).join(".local/share/linux-hello")
         };
 
         Self {
@@ -145,10 +143,7 @@ impl FaceAuthDaemon {
         })
     }
 
-    pub async fn register_face(
-        &self,
-        request: RegisterFaceRequest,
-    ) -> Result<String, DaemonError> {
+    pub async fn register_face(&self, request: RegisterFaceRequest) -> Result<String, DaemonError> {
         // Vérifier permissions
         self.check_user_permission(request.user_id)?;
 
@@ -165,9 +160,9 @@ impl FaceAuthDaemon {
             .map_err(|e| DaemonError::CameraError(e.to_string()))?;
 
         // Sélectionner la meilleure embedding (pour MVP: la première)
-        let embedding = capture.embeddings.first().ok_or(
-            DaemonError::CameraError("Aucune frame capturée".to_string()),
-        )?;
+        let embedding = capture.embeddings.first().ok_or(DaemonError::CameraError(
+            "Aucune frame capturée".to_string(),
+        ))?;
 
         // Générer un ID unique pour ce visage
         use std::time::{SystemTime, UNIX_EPOCH};
@@ -255,9 +250,9 @@ impl FaceAuthDaemon {
             .await
             .map_err(|e| DaemonError::CameraError(e.to_string()))?;
 
-        let probe = capture.embeddings.first().ok_or(
-            DaemonError::CameraError("Aucune frame capturée".to_string()),
-        )?;
+        let probe = capture.embeddings.first().ok_or(DaemonError::CameraError(
+            "Aucune frame capturée".to_string(),
+        ))?;
 
         // Charger les embeddings stockés
         let mut stored_embeddings = std::collections::HashMap::new();
@@ -270,11 +265,9 @@ impl FaceAuthDaemon {
         }
 
         // Matcher
-        let match_result = self.matcher.match_embedding(
-            probe,
-            &stored_embeddings,
-            &request.context,
-        );
+        let match_result =
+            self.matcher
+                .match_embedding(probe, &stored_embeddings, &request.context);
 
         if match_result.matched {
             Ok(VerifyResult::Success {
