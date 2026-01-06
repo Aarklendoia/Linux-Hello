@@ -246,6 +246,18 @@ pub extern "C" fn pam_sm_authenticate(
     }
 }
 
+#[allow(non_snake_case)]
+#[no_mangle]
+pub extern "C" fn pam_sm_setcred(
+    _pamh: *mut PamHandle,
+    _flags: c_int,
+    _argc: c_int,
+    _argv: *const *const c_char,
+) -> c_int {
+    debug!("pam_sm_setcred appelé");
+    PAM_SUCCESS
+}
+
 /// Fonction PAM pour fermeture de session
 #[allow(non_snake_case)]
 #[no_mangle]
