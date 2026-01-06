@@ -11,7 +11,8 @@
 
 use std::ffi::{CStr, CString};
 use std::os::raw::{c_char, c_int, c_void};
-use tracing::{debug, info, warn};
+use tracing::{debug, info, warn, error};
+use serde::{Serialize, Deserialize};
 
 // Bindings C basiques
 #[repr(C)]
@@ -199,22 +200,55 @@ pub extern "C" fn pam_sm_authenticate(
         username
     );
 
-    // TODO: Appeler le daemon D-Bus pour vérifier
-    // let verify_req = VerifyRequest {
-    //     user_id: uid_from_name(&username),
-    //     context: opts.context.clone(),
-    //     timeout_ms: opts.timeout_ms,
-    // };
-    // let result = call_daemon(&verify_req);
+    // Récupérer le UID de l'utilisateur
+    let user_id = match uid_from_name(&username) {
+        Some(uid) => uid,
+        None => {
+            warn!("Impossible de récupérer UID pour l'utilisateur: {}", username);
+            return PAM_AUTH_ERR;
+        }
+    };
 
-    // Pour l'instant: mock
-    if opts.debug {
-        debug!("Mode debug: returning PAM_IGNORE (continue avec password)");
+    debug!("UID de l'utilisateur {}: {}", username, user_id);
+
+    // Créer la requête D-Bus
+    let verify_req = VerifyRequest {
+        user_id,
+        context: opts.context.clone(),
+        timeout_ms: opts.timeout_ms,
+    };
+
+    // Appeler le daemon D-Bus
+    match call_daemon_sync(&verify_req) {
+        Ok(response) => {
+            match response {
+                VerifyResponse::Success { face_id, similarity_score } => {
+                    info!(
+                        "Authentification réussie pour {}: face_id={}, score={}",
+                        username, face_id, similarity_score
+                    );
+                    PAM_SUCCESS
+                }
+                VerifyResponse::Failure { reason } => {
+                    warn!(
+                        "Authentification échouée pour {}: {}",
+                        username, reason
+                    );
+                    PAM_AUTH_ERR
+                }
+            }
+        }
+        Err(e) => {
+            error!("Erreur lors de l'authentification D-Bus: {}", e);
+            
+            if opts.debug {
+                debug!("Mode debug: retournant PAM_IGNORE au lieu de PAM_SYSTEM_ERR");
+                PAM_IGNORE
+            } else {
+                PAM_SYSTEM_ERR
+            }
+        }
     }
-
-    // PAM_IGNORE = ne pas authentifier, laisser d'autres modules s'en charger
-    // C'est le comportement prudent pour le développement
-    PAM_IGNORE
 }
 
 /// Fonction PAM pour fermeture de session
@@ -273,16 +307,94 @@ pub extern "C" fn pam_sm_acct_mgmt(
 // Helpers
 // ============================================================================
 
-/// Traduire un nom d'utilisateur en UID (simplifié)
-fn _uid_from_name(_username: &str) -> u32 {
-    // TODO: Utiliser getpwnam pour vraie conversion
-    1000
+/// Traduire un nom d'utilisateur en UID
+fn uid_from_name(username: &str) -> Option<u32> {
+    use std::ffi::CString;
+    
+    unsafe {
+        let username_cstr = match CString::new(username) {
+            Ok(cstr) => cstr,
+            Err(_) => return None,
+        };
+        
+        // getpwnam est une fonction C de libc
+        extern "C" {
+            fn getpwnam(name: *const c_char) -> *mut libc::passwd;
+        }
+        
+        let pwd = getpwnam(username_cstr.as_ptr());
+        if pwd.is_null() {
+            return None;
+        }
+        
+        Some((*pwd).pw_uid)
+    }
 }
 
-/// Appeler le daemon D-Bus (skeleton)
-fn _call_daemon(_req: &str) -> Result<String, String> {
-    // TODO: Implémentation D-Bus
-    Err("Non implémenté".to_string())
+/// Structure de requête D-Bus pour Verify
+#[derive(Serialize, Deserialize, Debug)]
+struct VerifyRequest {
+    user_id: u32,
+    context: String,
+    timeout_ms: u64,
+}
+
+/// Structure de réponse D-Bus pour Verify
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(untagged)]
+enum VerifyResponse {
+    Success {
+        face_id: String,
+        similarity_score: f32,
+    },
+    Failure {
+        reason: String,
+    },
+}
+
+/// Appeler le daemon D-Bus de manière synchrone
+async fn call_daemon_verify(req: &VerifyRequest) -> Result<VerifyResponse, String> {
+    // Connexion au D-Bus session
+    let connection = zbus::Connection::session()
+        .await
+        .map_err(|e| format!("Erreur connexion D-Bus: {}", e))?;
+    
+    // Sérialiser la requête en JSON
+    let request_json = serde_json::to_string(req)
+        .map_err(|e| format!("Erreur sérialisation JSON: {}", e))?;
+    
+    // Appeler directement via introspection
+    let response_value = connection
+        .call_method(
+            Some("com.linuxhello.FaceAuth"),
+            "/com/linuxhello/FaceAuth",
+            Some("com.linuxhello.FaceAuth"),
+            "Verify",
+            &(request_json,),
+        )
+        .await
+        .map_err(|e| format!("Erreur appel D-Bus Verify: {}", e))?;
+    
+    // Extraire la réponse
+    let response_json: String = response_value
+        .body()
+        .deserialize()
+        .map_err(|e| format!("Erreur extraction réponse D-Bus: {}", e))?;
+    
+    // Déserialiser la réponse
+    let response: VerifyResponse = serde_json::from_str(&response_json)
+        .map_err(|e| format!("Erreur désérialisation réponse: {}", e))?;
+    
+    Ok(response)
+}
+
+/// Wrapper synchrone pour l'appel async D-Bus
+fn call_daemon_sync(req: &VerifyRequest) -> Result<VerifyResponse, String> {
+    // Créer un runtime tokio pour cette opération
+    let rt = tokio::runtime::Runtime::new()
+        .map_err(|e| format!("Erreur création runtime tokio: {}", e))?;
+    
+    rt.block_on(call_daemon_verify(req))
 }
 
 // Test

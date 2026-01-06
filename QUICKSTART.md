@@ -1,124 +1,125 @@
-# Quick Start Guide
+# 🚀 Quick Start - Linux Hello
 
-## 🚀 Compilation
+## 5 Minutes pour Tester
 
-Préalable: Rust 1.85+ (rustup)
-
-```bash
-cd /home/edtech/Documents/linux-hello-rust
-
-# Mode debug (rapide)
-cargo build --all
-
-# Mode release (optimisé, pour deployment)
-TMPDIR=/home/edtech/tmp cargo build --all --release
-```
-
-Résultats:
-- Daemon: `target/release/hello-daemon`
-- CLI: `target/release/linux-hello`
-- Module PAM: `target/release/libpam_linux_hello.so`
-
-## 🧪 Tests
-
-Exécuter tous les tests unitaires:
-```bash
-TMPDIR=/home/edtech/tmp cargo test --all --lib
-```
-
-Résultat attendu: ~10 tests passants, 0 failures
-
-## 🛠️ Démarrage du daemon (mode développement)
+### 1. Compiler (1 min)
 
 ```bash
-# Terminal 1: Lancer le daemon
-cargo run -p linux_hello_cli -- daemon --debug
-
-# Terminal 2: Tester la caméra
-cargo run -p linux_hello_cli -- camera --duration 5
-
-# Terminal 2: Enregistrer un visage (non fonctionnel yet)
-cargo run -p linux_hello_cli -- enroll 1000 --samples 3
-
-# Terminal 2: Vérifier (non fonctionnel yet)
-cargo run -p linux_hello_cli -- verify 1000
+cd ~/Documents/linux-hello-rust
+cargo build --release
 ```
 
-## 📦 Structure du projet
+### 2. Enregistrer un Visage (1 min)
 
-```
-.
-├── Cargo.toml          (workspace root)
-├── README.md           (vue d'ensemble)
-├── DESIGN.md           (spécifications D-Bus/PAM détaillées)
-├── TODO.md             (roadmap complet)
-├── .gitignore
-│
-├── hello_face_core/    (lib - traits, types)
-├── hello_camera/       (lib - abstraction caméra)
-├── hello_daemon/       (lib + bin - service D-Bus)
-├── pam_linux_hello/    (lib -> .so - module PAM)
-└── linux_hello_cli/    (bin - CLI de test)
+```bash
+./prepare-pam-test.sh
 ```
 
-## 🏗️ Étapes suivantes prioritaires
+### 3. Tester Sudo (1 min)
 
-1. **Phase 1 terminée** ✓ - Architecture de base
-2. **Phase 2** - Implémentation réelle:
-   - [ ] Stockage SQLite dans hello_daemon
-   - [ ] D-Bus exposition réelle (zbus)
-   - [ ] Appel caméra réelle (V4L2 binding complet)
-   - [ ] Backend détection (stub ou ONNX)
+```bash
+./test-sudo.sh
+```
 
-3. **Phase 3** - Intégration PAM:
-   - [ ] Appels D-Bus depuis module PAM
-   - [ ] Tests PAM custom
-   - [ ] Intégration login/sudo/kde
+### 4. Tester Screenlock (1 min)
 
-4. **Phase 4+** - KDE/Plasma, SDDM, hardening
+```bash
+./test-screenlock.sh
+```
 
-Voir [TODO.md](TODO.md) pour la liste complète avec dépendances.
+### 5. Vérifier le Status (1 min)
 
-## 🔧 Configuration du workspace
+```bash
+./overview.sh
+```
 
-- **Edition**: 2021
-- **Rust**: 1.85+
-- **Dependencies**: tokio, zbus, serde, sqlx, tracing, etc.
-- **Profiles**: Release optimisé pour .so (lto=true)
+---
 
-## 📚 Documentation
+## Installation Réelle (10 minutes)
 
-- **[README.md](README.md)** - Architecture générale
-- **[DESIGN.md](DESIGN.md)** - Spec D-Bus/PAM complète
-- **[TODO.md](TODO.md)** - Roadmap et tâches
-- **Code comments** - Rustdoc + inline comments
+### Prérequis
+- Droits sudo
+- Terminal
+- Visage enregistré (étape 2 ci-dessus)
 
-## ⚠️ Limitations actuelles (MVP)
+### Étapes
 
-- V4L2 en mode stub (retourne frame vide)
-- Détection/embedding en mode stub
-- D-Bus pas encore exposée
-- Stockage en RAM uniquement
-- PAM non connectée au daemon
-- Pas de UI KDE
+```bash
+# 1. Installer le module PAM
+sudo install -m 644 target/release/libpam_linux_hello.so \
+  /lib/x86_64-linux-gnu/security/pam_linux_hello.so
 
-Ces limitations sont intentionnelles: le MVP valide l'architecture.
-Phase 2 ajoute les implémentations réelles progressivement.
+# 2. Backup configuration sudo
+sudo cp /etc/pam.d/sudo /etc/pam.d/sudo.backup
 
-## 🔗 Prochains fichiers à créer
+# 3. Éditer /etc/pam.d/sudo
+sudo nano /etc/pam.d/sudo
+```
 
-1. **hello_daemon/migrations/001_init.sql** - Schéma SQLite
-2. **hello_daemon/src/storage.rs** - Repository SQLite
-3. **hello_daemon/src/dbus_server.rs** - Exposition D-Bus réelle
-4. **pam_linux_hello/src/dbus_client.rs** - Client D-Bus depuis PAM
-5. **tests/integration/** - Tests E2E
+Dans l'éditeur, **ajouter EN DÉBUT** (avant tout `auth`):
 
-## 💡 Notes de développement
+```
+# Linux Hello - Face authentication for sudo
+auth sufficient /lib/x86_64-linux-gnu/security/pam_linux_hello.so context=sudo timeout_ms=3000 debug
+```
 
-- Toutes les crates compilent et testent ✓
-- Warnings peuvent être ignorés (imports inutilisés en stub)
-- Utilisez `TMPDIR=/home/edtech/tmp` si compilation échoue sur /tmp
-- Les constantes PAM sont en dur (utils/pam_constants.h si besoin évolution)
-- Architecture est figée, on peut commencer l'implémentation
+Sauvegarder: `Ctrl+O`, `Enter`, `Ctrl+X`
 
-Bonne chance! 🚀
+```bash
+# 4. Lancer le daemon
+./target/release/hello-daemon &
+
+# 5. Tester!
+sudo -v
+```
+
+Vous devriez être invité à la reconnaissance faciale!
+
+---
+
+## Problème? Restaurer!
+
+```bash
+# Restaurer sudo original
+sudo cp /etc/pam.d/sudo.backup /etc/pam.d/sudo
+
+# Arrêter daemon
+pkill hello-daemon
+```
+
+---
+
+## Commandes Utiles
+
+```bash
+# Démarrer daemon avec debug
+./target/release/hello-daemon --debug
+
+# Lister visages enregistrés
+dbus-send --session --print-reply \
+  --dest=com.linuxhello.FaceAuth \
+  /com/linuxhello/FaceAuth \
+  com.linuxhello.FaceAuth.ListFaces \
+  uint32:$(id -u)
+
+# Ping daemon
+dbus-send --session --print-reply \
+  --dest=com.linuxhello.FaceAuth \
+  /com/linuxhello/FaceAuth \
+  com.linuxhello.FaceAuth.Ping
+
+# Voir logs daemon
+journalctl --user -u hello-daemon -f
+```
+
+---
+
+## Docs Complètes
+
+- `INTEGRATION_GUIDE.md` - Installation détaillée + troubleshooting
+- `PAM_MODULE.md` - Référence technique
+- `STATUS.md` - État complet du projet
+
+---
+
+**Bon test! 🎉**

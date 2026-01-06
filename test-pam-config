@@ -1,0 +1,5 @@
+#%PAM-1.0
+# Configuration PAM de test pour linux-hello
+
+auth sufficient /home/edtech/Documents/linux-hello-rust/target/debug/libpam_linux_hello.so context=test debug
+auth required pam_permit.so
