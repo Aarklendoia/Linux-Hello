@@ -9,10 +9,14 @@
 //! auth include system-login
 //! ```
 
+use serde::{Deserialize, Serialize};
 use std::ffi::CStr;
+use std::fs::OpenOptions;
+use std::io::Write;
 use std::os::raw::{c_char, c_int, c_void};
+use std::os::unix::fs::OpenOptionsExt;
+use std::time::{SystemTime, UNIX_EPOCH};
 use tracing::{debug, info, warn};
-use serde::{Serialize, Deserialize};
 
 // Bindings C basiques
 #[repr(C)]
@@ -21,17 +25,10 @@ pub struct PamHandle {
 }
 
 extern "C" {
-    fn pam_get_item(
-        pamh: *mut PamHandle,
-        item_type: c_int,
-        item: *mut *const c_void,
-    ) -> c_int;
+    fn pam_get_item(pamh: *mut PamHandle, item_type: c_int, item: *mut *const c_void) -> c_int;
 
-    fn pam_get_user(
-        pamh: *mut PamHandle,
-        user: *mut *const c_char,
-        prompt: *const c_char,
-    ) -> c_int;
+    fn pam_get_user(pamh: *mut PamHandle, user: *mut *const c_char, prompt: *const c_char)
+        -> c_int;
 }
 
 // Constantes PAM
@@ -160,6 +157,7 @@ pub extern "C" fn pam_sm_authenticate(
         .try_init();
 
     debug!("pam_sm_authenticate appelé");
+    log_pam("pam_sm_authenticate commencé");
 
     // Parser les options
     let opts = parse_options(argc, argv);
@@ -195,16 +193,20 @@ pub extern "C" fn pam_sm_authenticate(
         }
     };
 
-    info!(
-        "Authentification faciale pour l'utilisateur: {}",
-        username
-    );
+    info!("Authentification faciale pour l'utilisateur: {}", username);
+    log_pam(&format!(
+        "pam_sm_authenticate utilisateur={} context={} timeout_ms={}",
+        username, &opts.context, opts.timeout_ms
+    ));
 
     // Récupérer le UID de l'utilisateur
     let user_id = match uid_from_name(&username) {
         Some(uid) => uid,
         None => {
-            warn!("Impossible de récupérer UID pour l'utilisateur: {}", username);
+            warn!(
+                "Impossible de récupérer UID pour l'utilisateur: {}",
+                username
+            );
             return PAM_AUTH_ERR;
         }
     };
@@ -220,28 +222,38 @@ pub extern "C" fn pam_sm_authenticate(
 
     // Appeler le helper via socket au lieu de D-Bus
     match call_pam_helper_sync(&helper_req) {
-        Ok(response) => {
-            match response {
-                PamHelperResponse::Success { face_id, similarity_score } => {
-                    info!(
-                        "Authentification réussie pour {}: face_id={}, score={}",
-                        username, face_id, similarity_score
-                    );
-                    PAM_SUCCESS
-                }
-                PamHelperResponse::Failure { reason } => {
-                    warn!(
-                        "Authentification échouée pour {}: {}",
-                        username, reason
-                    );
-                    PAM_AUTH_ERR
-                }
+        Ok(response) => match response {
+            PamHelperResponse::Success {
+                face_id,
+                similarity_score,
+            } => {
+                info!(
+                    "Authentification réussie pour {}: face_id={}, score={}",
+                    username, face_id, similarity_score
+                );
+                log_pam(&format!(
+                    "helper success user={} face_id={} score={}",
+                    username, face_id, similarity_score
+                ));
+                PAM_SUCCESS
             }
-        }
+            PamHelperResponse::Failure { reason } => {
+                warn!("Authentification échouée pour {}: {}", username, reason);
+                log_pam(&format!(
+                    "helper failure user={} reason={}",
+                    username, reason
+                ));
+                PAM_AUTH_ERR
+            }
+        },
         Err(e) => {
             // Erreur ou helper non disponible = ignorer et laisser pam_unix.so prendre le relais
-            warn!("PAM helper non disponible ou erreur: {}. Passant au fallback password.", e);
-            PAM_IGNORE  // ← IMPORTANT: PAM_IGNORE pour passer au suivant, pas PAM_SYSTEM_ERR
+            warn!(
+                "PAM helper non disponible ou erreur: {}. Passant au fallback password.",
+                e
+            );
+            log_pam(&format!("helper error user={} err={}", username, e));
+            PAM_IGNORE // ← IMPORTANT: PAM_IGNORE pour passer au suivant, pas PAM_SYSTEM_ERR
         }
     }
 }
@@ -317,23 +329,23 @@ pub extern "C" fn pam_sm_acct_mgmt(
 /// Traduire un nom d'utilisateur en UID
 fn uid_from_name(username: &str) -> Option<u32> {
     use std::ffi::CString;
-    
+
     unsafe {
         let username_cstr = match CString::new(username) {
             Ok(cstr) => cstr,
             Err(_) => return None,
         };
-        
+
         // getpwnam est une fonction C de libc
         extern "C" {
             fn getpwnam(name: *const c_char) -> *mut libc::passwd;
         }
-        
+
         let pwd = getpwnam(username_cstr.as_ptr());
         if pwd.is_null() {
             return None;
         }
-        
+
         Some((*pwd).pw_uid)
     }
 }
@@ -361,20 +373,15 @@ enum PamHelperResponse {
 
 /// Appeler le helper PAM via socket Unix OU directement via subprocess
 fn call_pam_helper_sync(req: &PamHelperRequest) -> Result<PamHelperResponse, String> {
-    
-    
-    
-
     let uid = unsafe { libc::getuid() };
-    
-    // Si on est root, utiliser le test CLI comme helper
-    if uid == 0 {
-        // On est root (via sudo) - appeler le CLI tool de l'utilisateur original
-        return call_via_cli(req);
-    }
+    log_pam(&format!(
+        "call_pam_helper_sync uid={} target_uid={}",
+        uid, req.user_id
+    ));
 
-    // Sinon, on n'a rien à faire, retourner erreur
-    Err("PAM: impossible d'authentifier en contexte root sans helper".to_string())
+    // Essayer d'appeler la CLI quel que soit le UID
+    // Si on est root, appel direct; sinon, on tente en tant qu'utilisateur
+    call_via_cli(req)
 }
 
 /// Appeler le daemon via le CLI tool (simule ce que le helper ferait)
@@ -384,6 +391,11 @@ fn call_via_cli(req: &PamHelperRequest) -> Result<PamHelperResponse, String> {
     // Récupérer le home de l'utilisateur original en lisant /etc/passwd
     let home = get_home_for_uid(req.user_id)
         .ok_or("Impossible de récupérer le home de l'utilisateur".to_string())?;
+
+    log_pam(&format!(
+        "call_via_cli user_id={} home={}",
+        req.user_id, &home
+    ));
 
     let cli_path = "/home/edtech/Documents/linux-hello-rust/target/release/examples/test_cli";
 
@@ -397,12 +409,24 @@ fn call_via_cli(req: &PamHelperRequest) -> Result<PamHelperResponse, String> {
         .output()
         .map_err(|e| format!("Erreur lancement CLI: {}", e))?;
 
+    log_pam(&format!(
+        "call_via_cli status={} stdout={}",
+        output.status,
+        format!(
+            "{}",
+            String::from_utf8_lossy(&output.stdout)
+                .lines()
+                .next()
+                .unwrap_or("")
+        )
+    ));
+
     if !output.status.success() {
         return Err("CLI verify failed".to_string());
     }
 
     let stdout = String::from_utf8_lossy(&output.stdout);
-    
+
     // Parser la sortie pour extraire le score
     if stdout.contains("1.00") || stdout.contains("Succès") {
         Ok(PamHelperResponse::Success {
@@ -419,9 +443,9 @@ fn call_via_cli(req: &PamHelperRequest) -> Result<PamHelperResponse, String> {
 /// Récupérer le répertoire home d'un utilisateur via son UID
 fn get_home_for_uid(uid: u32) -> Option<String> {
     use std::fs;
-    
+
     let passwd_content = fs::read_to_string("/etc/passwd").ok()?;
-    
+
     for line in passwd_content.lines() {
         let parts: Vec<&str> = line.split(':').collect();
         if parts.len() >= 6 {
@@ -432,8 +456,33 @@ fn get_home_for_uid(uid: u32) -> Option<String> {
             }
         }
     }
-    
+
     None
+}
+
+fn log_pam(message: &str) {
+    let timestamp = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap_or_default();
+    let line = format!(
+        "{}.{:03} pam_linux_hello: {}",
+        timestamp.as_secs(),
+        timestamp.subsec_millis(),
+        message
+    );
+    let mut file = match OpenOptions::new()
+        .create(true)
+        .append(true)
+        .mode(0o644)
+        .open("/tmp/pam_linux_hello.log")
+    {
+        Ok(f) => f,
+        Err(e) => {
+            let _ = eprintln!("pam log failed: {}", e);
+            return;
+        }
+    };
+    let _ = writeln!(file, "{}", line);
 }
 
 // Les anciennes fonctions restent pour compatibilité (pas utilisées)
@@ -466,11 +515,11 @@ async fn call_daemon_verify(req: &VerifyRequest) -> Result<VerifyResponse, Strin
     let connection = zbus::Connection::session()
         .await
         .map_err(|e| format!("Erreur connexion D-Bus: {}", e))?;
-    
+
     // Sérialiser la requête en JSON
-    let request_json = serde_json::to_string(req)
-        .map_err(|e| format!("Erreur sérialisation JSON: {}", e))?;
-    
+    let request_json =
+        serde_json::to_string(req).map_err(|e| format!("Erreur sérialisation JSON: {}", e))?;
+
     // Appeler directement via introspection
     let response_value = connection
         .call_method(
@@ -482,17 +531,17 @@ async fn call_daemon_verify(req: &VerifyRequest) -> Result<VerifyResponse, Strin
         )
         .await
         .map_err(|e| format!("Erreur appel D-Bus Verify: {}", e))?;
-    
+
     // Extraire la réponse
     let response_json: String = response_value
         .body()
         .deserialize()
         .map_err(|e| format!("Erreur extraction réponse D-Bus: {}", e))?;
-    
+
     // Déserialiser la réponse
     let response: VerifyResponse = serde_json::from_str(&response_json)
         .map_err(|e| format!("Erreur désérialisation réponse: {}", e))?;
-    
+
     Ok(response)
 }
 
@@ -501,7 +550,7 @@ fn call_daemon_sync(req: &VerifyRequest) -> Result<VerifyResponse, String> {
     // Créer un runtime tokio pour cette opération
     let rt = tokio::runtime::Runtime::new()
         .map_err(|e| format!("Erreur création runtime tokio: {}", e))?;
-    
+
     rt.block_on(call_daemon_verify(req))
 }
 
