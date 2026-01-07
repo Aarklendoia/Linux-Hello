@@ -9,6 +9,8 @@ use serde::{Deserialize, Serialize};
 use std::fmt;
 use thiserror::Error;
 
+pub mod stub_detector;
+
 /// Résultat de détection de visage
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FaceRegion {

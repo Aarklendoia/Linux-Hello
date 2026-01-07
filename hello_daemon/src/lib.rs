@@ -12,6 +12,7 @@ use thiserror::Error;
 use tracing::info;
 
 pub mod camera;
+pub mod capture_stream;
 pub mod dbus;
 pub mod dbus_interface;
 pub mod matcher;

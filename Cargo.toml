@@ -5,6 +5,7 @@ members = [
     "hello_daemon",
     "pam_linux_hello",
     "linux_hello_cli",
+    "linux_hello_config",
 ]
 
 resolver = "2"
@@ -28,6 +29,7 @@ tokio-util = "0.7"
 # Serialization
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+serde_bytes = "0.11"
 
 # Errors
 anyhow = "1.0"
@@ -35,7 +37,11 @@ thiserror = "1.0"
 
 # Logging
 tracing = "0.1"
-tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt", "json"] }
+tracing-subscriber = { version = "0.3", features = [
+    "env-filter",
+    "fmt",
+    "json",
+] }
 
 # D-Bus
 zbus = { version = "4.4", features = ["tokio"] }
@@ -61,5 +67,6 @@ rand = "0.8"
 # System
 libc = "0.2"
 parking_lot = "0.12"
+dirs = "5.0"
 # Testing
 tempfile = "3.8"

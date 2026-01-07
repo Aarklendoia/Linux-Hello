@@ -1,0 +1,37 @@
+[package]
+name = "linux_hello_config"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+hello_daemon = { path = "../hello_daemon" }
+hello_camera = { path = "../hello_camera" }
+hello_face_core = { path = "../hello_face_core" }
+anyhow.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+tokio = { workspace = true, features = ["sync"] }
+zbus = { workspace = true, features = ["tokio"] }
+zvariant.workspace = true
+serde = { workspace = true }
+serde_json.workspace = true
+clap = { workspace = true, features = ["derive"] }
+parking_lot.workspace = true
+
+# GUI avec iced (cross-platform, moderne, Wayland)
+# Alternative: druid, fltk (pour plus natif KDE)
+# Pour MVP, utiliser iced (plus moderne et Wayland-ready)
+iced = { version = "0.12", features = ["debug"] }
+image = { workspace = true }
+
+# Pour affichage images RGB
+pixels = "0.13" # Pixel buffer pour rendu GPU
+
+# D-Bus async
+async-trait = "0.1"
+
+# Configuration
+dirs = "5.0"
