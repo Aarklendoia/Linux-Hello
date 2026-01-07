@@ -12,17 +12,22 @@ use std::time::Instant;
 
 mod animation_tests;
 mod animation_ticker;
+mod button_builder;
 mod button_state;
 mod config;
 mod dbus_client;
+mod performance_tests;
 mod preview;
+mod render_cache;
 mod streaming;
 mod ui;
 
 use animation_ticker::AnimationTicker;
+use button_builder::styled_button;
 use button_state::{ButtonState, ButtonStates};
 use iced::futures::stream::{self, Stream};
 use iced::futures::StreamExt;
+use render_cache::{BoundingBoxCache, FrameCache};
 use std::time::Duration;
 use streaming::CaptureFrame;
 use ui::Screen;
@@ -48,6 +53,10 @@ struct LinuxHelloConfig {
 
     // Button states for transitions
     button_states: ButtonStates,
+
+    // Rendering optimization caches
+    frame_cache: FrameCache,      // Avoid redundant frame calculations
+    bbox_cache: BoundingBoxCache, // Lazy bounding box drawing
 
     // Animation ticker
     animation_ticker: AnimationTicker, // Generates animation ticks
@@ -77,6 +86,12 @@ enum Message {
     // Animations
     AnimationTick, // Update animations every frame
 
+    // Button interactions for visual effects
+    ButtonHovered(String),   // Button ID hovered
+    ButtonUnhovered(String), // Button ID unhovered
+    ButtonPressed(String),   // Button ID pressed
+    ButtonReleased(String),  // Button ID released
+
     // General
     WindowClosed,
 }
@@ -104,6 +119,8 @@ impl Application for LinuxHelloConfig {
                 last_animation_update: Instant::now(),
                 animation_preview_opacity: 1.0,
                 button_states: ButtonStates::new(),
+                frame_cache: FrameCache::new(),
+                bbox_cache: BoundingBoxCache::new(),
                 animation_ticker: ticker,
             },
             Command::none(),
@@ -155,6 +172,15 @@ impl Application for LinuxHelloConfig {
                         (frame.frame_number as f32 + 1.0) / frame.total_frames as f32;
 
                     self.current_frame = Some(frame.clone());
+
+                    // Invalidate rendering caches when new frame arrives
+                    self.frame_cache.invalidate();
+
+                    // Update bbox cache - check if face is detected
+                    let face_detected = frame.face_detected;
+                    let confidence = frame.quality_score;
+                    self.bbox_cache.update(face_detected, confidence);
+
                     self.preview_state.update_frame(frame);
 
                     // Fade-in preview
@@ -193,6 +219,54 @@ impl Application for LinuxHelloConfig {
                 }
 
                 self.last_animation_update = now;
+            }
+            Message::ButtonHovered(button_id) => {
+                // Update button state to Hover
+                match button_id.as_str() {
+                    "start_capture" => self.button_states.start_capture_btn = ButtonState::Hover,
+                    "stop_capture" => self.button_states.stop_capture_btn = ButtonState::Hover,
+                    "home" => self.button_states.home_btn = ButtonState::Hover,
+                    "enroll" => self.button_states.enroll_btn = ButtonState::Hover,
+                    "settings" => self.button_states.settings_btn = ButtonState::Hover,
+                    "manage" => self.button_states.manage_btn = ButtonState::Hover,
+                    _ => {}
+                }
+            }
+            Message::ButtonUnhovered(button_id) => {
+                // Return button state to Normal
+                match button_id.as_str() {
+                    "start_capture" => self.button_states.start_capture_btn = ButtonState::Normal,
+                    "stop_capture" => self.button_states.stop_capture_btn = ButtonState::Normal,
+                    "home" => self.button_states.home_btn = ButtonState::Normal,
+                    "enroll" => self.button_states.enroll_btn = ButtonState::Normal,
+                    "settings" => self.button_states.settings_btn = ButtonState::Normal,
+                    "manage" => self.button_states.manage_btn = ButtonState::Normal,
+                    _ => {}
+                }
+            }
+            Message::ButtonPressed(button_id) => {
+                // Set button to Pressed state
+                match button_id.as_str() {
+                    "start_capture" => self.button_states.start_capture_btn = ButtonState::Pressed,
+                    "stop_capture" => self.button_states.stop_capture_btn = ButtonState::Pressed,
+                    "home" => self.button_states.home_btn = ButtonState::Pressed,
+                    "enroll" => self.button_states.enroll_btn = ButtonState::Pressed,
+                    "settings" => self.button_states.settings_btn = ButtonState::Pressed,
+                    "manage" => self.button_states.manage_btn = ButtonState::Pressed,
+                    _ => {}
+                }
+            }
+            Message::ButtonReleased(button_id) => {
+                // Reset button state after press
+                match button_id.as_str() {
+                    "start_capture" => self.button_states.start_capture_btn = ButtonState::Normal,
+                    "stop_capture" => self.button_states.stop_capture_btn = ButtonState::Normal,
+                    "home" => self.button_states.home_btn = ButtonState::Normal,
+                    "enroll" => self.button_states.enroll_btn = ButtonState::Normal,
+                    "settings" => self.button_states.settings_btn = ButtonState::Normal,
+                    "manage" => self.button_states.manage_btn = ButtonState::Normal,
+                    _ => {}
+                }
             }
             Message::WindowClosed => {
                 // TODO: Cleanup
