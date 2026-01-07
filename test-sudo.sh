@@ -26,10 +26,10 @@ echo ""
 
 # Vérifier qu'un visage est enregistré
 echo "3. Vérification: visages enregistrés..."
-FACES=$(dbus-send --session --print-reply --dest=com.linuxhello.FaceAuth /com/linuxhello/FaceAuth com.linuxhello.FaceAuth.ListFaces uint32:$USER_ID 2>&1 | grep -o "face_id" | wc -l)
+FACES=$(dbus-send --session --print-reply --dest=com.linuxhello.FaceAuth /com/linuxhello/FaceAuth com.linuxhello.FaceAuth.ListFaces uint32:"$USER_ID" 2>&1 | grep -o "face_id" | wc -l)
 echo "   Visages trouvés: $FACES"
 
-if [ $FACES -eq 0 ]; then
+if [ "$FACES" -eq 0 ]; then
     echo ""
     echo "   ⚠️  Aucun visage enregistré! Enregistrement..."
     dbus-send --session --print-reply \

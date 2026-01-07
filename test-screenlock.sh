@@ -28,16 +28,16 @@ echo ""
 
 # Vérifier/créer visages
 echo "3. Préparation: visages enregistrés..."
-FACES=$(dbus-send --session --print-reply --dest=com.linuxhello.FaceAuth /com/linuxhello/FaceAuth com.linuxhello.FaceAuth.ListFaces uint32:$USER_ID 2>&1 | grep -o "face_id" | wc -l)
+FACES=$(dbus-send --session --print-reply --dest=com.linuxhello.FaceAuth /com/linuxhello/FaceAuth com.linuxhello.FaceAuth.ListFaces uint32:"$USER_ID" 2>&1 | grep -o "face_id" | wc -l)
 echo "   Visages trouvés: $FACES"
 
-if [ $FACES -eq 0 ]; then
+if [ "$FACES" -eq 0 ]; then
     echo "   → Enregistrement d'un nouveau visage..."
     dbus-send --session --print-reply \
       --dest=com.linuxhello.FaceAuth \
       /com/linuxhello/FaceAuth \
       com.linuxhello.FaceAuth.RegisterFace \
-      string:"{\"user_id\":$USER_ID,\"context\":\"screenlock\",\"timeout_ms\":5000,\"num_samples\":1}" > /dev/null 2>&1
+      "string:{\"user_id\":$USER_ID,\"context\":\"screenlock\",\"timeout_ms\":5000,\"num_samples\":1}" > /dev/null 2>&1
     echo "   ✓ Visage enregistré"
 fi
 echo ""

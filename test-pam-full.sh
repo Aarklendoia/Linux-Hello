@@ -43,7 +43,7 @@ echo ""
 # Pour tester avec pamtester, on aurait besoin d'une configuration PAM
 # Pour l'instant, vérifier juste que le module charge et D-Bus fonctionne
 echo "4. Listing des visages..."
-dbus-send --session --print-reply --dest=com.linuxhello.FaceAuth /com/linuxhello/FaceAuth com.linuxhello.FaceAuth.ListFaces uint32:$USER_ID 2>&1 | tail -1 | head -c 100
+dbus-send --session --print-reply --dest=com.linuxhello.FaceAuth /com/linuxhello/FaceAuth com.linuxhello.FaceAuth.ListFaces uint32:"$USER_ID" 2>&1 | tail -1 | head -c 100
 echo "..."
 echo ""
 

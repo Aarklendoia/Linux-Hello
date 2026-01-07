@@ -69,7 +69,7 @@ async fn main() -> anyhow::Result<()> {
         e
     })?;
 
-    let _ = connection
+    connection
         .request_name("com.linuxhello.FaceAuth")
         .await
         .map_err(|e| {

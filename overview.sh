@@ -6,7 +6,7 @@ echo "║          Linux Hello - Authentification Faciale Linux          ║"
 echo "╚════════════════════════════════════════════════════════════════╝"
 echo ""
 
-cd /home/edtech/Documents/linux-hello-rust
+cd /home/edtech/Documents/linux-hello-rust || exit 1
 
 # Afficher la structure du projet
 echo "📁 Structure du Projet:"
@@ -21,7 +21,11 @@ echo ""
 
 # Afficher les artefacts compilés
 echo "📦 Artefacts:"
-ls -lh target/release/{hello-daemon,linux-hello,libpam_linux_hello.so*} 2>/dev/null | awk '{print "   " $9 " (" $5 ")"}'
+find target/release -maxdepth 1 \( -name "hello-daemon" -o -name "linux-hello" -o -name "libpam_linux_hello.so*" \) -type f 2>/dev/null | while read -r file; do
+    size=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file" 2>/dev/null)
+    size_h=$(numfmt --to=iec-i --suffix=B "$size" 2>/dev/null || printf "%s\n" "$size")
+    printf "   %s (%s)\n" "$file" "$size_h"
+done
 echo ""
 
 # Afficher la config

@@ -135,10 +135,14 @@ fn _pam_conv_send(
 /// PAM_SUCCESS si authentification réussie
 /// PAM_AUTH_ERR si authentification échouée
 /// PAM_IGNORE si le module ne peut pas authentifier (laisser continuer)
+///
+/// # Safety
+/// This function dereferences raw pointers passed from C code (pamh and argv).
+/// The caller must ensure these pointers are valid and properly aligned.
 #[allow(non_snake_case)]
 #[allow(unsafe_op_in_unsafe_fn)]
 #[no_mangle]
-pub extern "C" fn pam_sm_authenticate(
+pub unsafe extern "C" fn pam_sm_authenticate(
     pamh: *mut PamHandle,
     _flags: c_int,
     argc: c_int,

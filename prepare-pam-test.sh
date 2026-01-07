@@ -15,7 +15,6 @@ DAEMON_PID=$!
 sleep 3
 
 echo "2. Enregistrement d'un visage pour l'utilisateur courant..."
-USERNAME=$(whoami)
 USER_ID=$(id -u)
 
 # Appeler RegisterFace via D-Bus
@@ -28,7 +27,7 @@ echo "   Réponse: $RESPONSE"
 echo ""
 
 echo "3. Vérification: énumération des visages..."
-dbus-send --session --print-reply --dest=com.linuxhello.FaceAuth /com/linuxhello/FaceAuth com.linuxhello.FaceAuth.ListFaces uint32:$USER_ID 2>&1 | tail -1 | head -c 100
+dbus-send --session --print-reply --dest=com.linuxhello.FaceAuth /com/linuxhello/FaceAuth com.linuxhello.FaceAuth.ListFaces uint32:"$USER_ID" 2>&1 | tail -1 | head -c 100
 echo "..."
 echo ""
 
