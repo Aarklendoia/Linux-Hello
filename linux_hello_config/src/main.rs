@@ -5,7 +5,8 @@
 //! - Configuration des paramètres d'authentification
 //! - Gestion des visages enregistrés
 
-use iced::widget::{Container, Row, Text};
+#[allow(unused_imports)]
+use iced::widget::{Button, Column, Container, ProgressBar, Row, Text};
 use iced::{executor, Application, Command, Element, Length};
 
 mod config;
@@ -28,6 +29,7 @@ struct LinuxHelloConfig {
     frame_count: u32,
     total_frames: u32,
     capture_active: bool,
+    preview_state: preview::PreviewState,
 }
 
 #[derive(Debug, Clone)]
@@ -69,6 +71,7 @@ impl Application for LinuxHelloConfig {
                 frame_count: 0,
                 total_frames: 0,
                 capture_active: false,
+                preview_state: preview::PreviewState::new(),
             },
             Command::none(),
         )
@@ -111,7 +114,8 @@ impl Application for LinuxHelloConfig {
                 if let Ok(frame) = serde_json::from_str::<CaptureFrame>(&json) {
                     self.frame_count = frame.frame_number + 1;
                     self.total_frames = frame.total_frames;
-                    self.current_frame = Some(frame);
+                    self.current_frame = Some(frame.clone());
+                    self.preview_state.update_frame(frame);
                 }
             }
             Message::CaptureCompleted(user_id) => {
@@ -165,17 +169,83 @@ impl LinuxHelloConfig {
             .into()
     }
 
-    fn view_enrollment(&self) -> Element<Message> {
-        Row::new()
-            .push(
-                Container::new(Text::new("Enregistrement"))
-                    .width(Length::Fill)
-                    .center_x(),
+    fn view_enrollment(&self) -> Element<'_, Message> {
+        use iced::widget::{Button, Column, ProgressBar};
+
+        let progress = self.preview_state.progress_percent();
+        let progress_text = self.preview_state.progress_text();
+        let detection_text = self.preview_state.detection_status();
+
+        let preview_display = if self.preview_state.current_frame.is_some() {
+            // Afficher: "Frame en cours de capture"
+            Container::new(
+                Column::new()
+                    .push(Text::new("📹 Preview en direct"))
+                    .push(Text::new(format!(
+                        "Résolution: {}×{}",
+                        self.preview_state.width, self.preview_state.height
+                    )))
+                    .push(Text::new(detection_text))
+                    .spacing(10),
             )
+            .width(Length::Fill)
+            .padding(20)
+            .style(|theme: &iced::Theme| iced::widget::container::Appearance {
+                background: Some(iced::Color::from_rgb(0.1, 0.1, 0.1).into()),
+                ..Default::default()
+            })
+        } else {
+            Container::new(Text::new("En attente de capture...").size(16))
+                .width(Length::Fill)
+                .padding(40)
+                .center_x()
+        };
+
+        let progress_bar = ProgressBar::new(0.0..=1.0, progress);
+
+        let enrollment_content = Column::new()
+            .push(Text::new("Enregistrement de Visage").size(24))
+            .push(preview_display)
+            .push(
+                Column::new()
+                    .push(progress_bar)
+                    .push(Text::new(format!("Progression: {}", progress_text)))
+                    .spacing(5)
+                    .width(Length::Fill)
+                    .padding(20),
+            )
+            .push(
+                Row::new()
+                    .push(
+                        Button::new(Text::new("▶ Démarrer"))
+                            .on_press(Message::StartCapture)
+                            .padding(10),
+                    )
+                    .push(
+                        Button::new(Text::new("⏹ Arrêter"))
+                            .on_press(Message::StopCapture)
+                            .padding(10),
+                    )
+                    .push(
+                        Button::new(Text::new("🏠 Accueil"))
+                            .on_press(Message::GoToHome)
+                            .padding(10),
+                    )
+                    .spacing(10)
+                    .width(Length::Fill)
+                    .padding(20),
+            )
+            .width(Length::Fill)
+            .spacing(10)
+            .padding(20);
+
+        Container::new(enrollment_content)
+            .width(Length::Fill)
+            .height(Length::Fill)
             .into()
     }
 
-    fn view_settings(&self) -> Element<Message> {
+    fn view_settings(&self) -> Element<'_, Message> {
         Row::new()
             .push(
                 Container::new(Text::new("Paramètres"))
@@ -185,7 +255,7 @@ impl LinuxHelloConfig {
             .into()
     }
 
-    fn view_manage_faces(&self) -> Element<Message> {
+    fn view_manage_faces(&self) -> Element<'_, Message> {
         Row::new()
             .push(
                 Container::new(Text::new("Gérer les visages"))

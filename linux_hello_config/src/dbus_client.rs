@@ -2,7 +2,9 @@
 //!
 //! Gère la connexion et l'écoute des signaux D-Bus du daemon
 
+#[allow(unused_imports)]
 use std::sync::Arc;
+#[allow(unused_imports)]
 use tokio::sync::Mutex;
 use tracing::info;
 
