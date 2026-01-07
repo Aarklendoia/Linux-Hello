@@ -5,15 +5,16 @@
 //! - Configuration des paramètres d'authentification
 //! - Gestion des visages enregistrés
 
-use iced::{
-    executor, Application, Command, Element, Length,
-};
 use iced::widget::{Container, Row, Text};
+use iced::{executor, Application, Command, Element, Length};
 
-mod ui;
-mod preview;
 mod config;
+mod dbus_client;
+mod preview;
+mod streaming;
+mod ui;
 
+use streaming::CaptureFrame;
 use ui::Screen;
 
 pub fn main() -> iced::Result {
@@ -23,7 +24,10 @@ pub fn main() -> iced::Result {
 /// Application principale
 struct LinuxHelloConfig {
     current_screen: Screen,
-    // TODO: State management
+    current_frame: Option<CaptureFrame>,
+    frame_count: u32,
+    total_frames: u32,
+    capture_active: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -38,6 +42,11 @@ enum Message {
     StartCapture,
     StopCapture,
     FrameCaptured(Vec<u8>),
+
+    // D-Bus Streaming
+    CaptureProgressReceived(String), // JSON event from daemon
+    CaptureCompleted(u32),           // user_id
+    CaptureError(String),            // error message
 
     // Settings
     SettingChanged(String, String),
@@ -56,6 +65,10 @@ impl Application for LinuxHelloConfig {
         (
             Self {
                 current_screen: Screen::Home,
+                current_frame: None,
+                frame_count: 0,
+                total_frames: 0,
+                capture_active: false,
             },
             Command::none(),
         )
@@ -69,6 +82,7 @@ impl Application for LinuxHelloConfig {
         match message {
             Message::GoToHome => {
                 self.current_screen = Screen::Home;
+                self.capture_active = false;
             }
             Message::GoToEnroll => {
                 self.current_screen = Screen::Enrollment;
@@ -80,13 +94,33 @@ impl Application for LinuxHelloConfig {
                 self.current_screen = Screen::ManageFaces;
             }
             Message::StartCapture => {
-                // TODO: Lancer la capture caméra
+                self.capture_active = true;
+                self.frame_count = 0;
+                self.total_frames = 30;
+                // TODO: Lancer la capture via D-Bus
             }
             Message::StopCapture => {
+                self.capture_active = false;
                 // TODO: Arrêter la capture
             }
             Message::FrameCaptured(_data) => {
                 // TODO: Afficher la frame
+            }
+            Message::CaptureProgressReceived(json) => {
+                // Parser le JSON et mettre à jour current_frame
+                if let Ok(frame) = serde_json::from_str::<CaptureFrame>(&json) {
+                    self.frame_count = frame.frame_number + 1;
+                    self.total_frames = frame.total_frames;
+                    self.current_frame = Some(frame);
+                }
+            }
+            Message::CaptureCompleted(user_id) => {
+                tracing::info!("Capture complétée pour user_id={}", user_id);
+                self.capture_active = false;
+            }
+            Message::CaptureError(err) => {
+                tracing::error!("Erreur capture: {}", err);
+                self.capture_active = false;
             }
             Message::SettingChanged(_key, _value) => {
                 // TODO: Sauvegarder le paramètre

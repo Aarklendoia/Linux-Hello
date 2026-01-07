@@ -3,24 +3,40 @@
 //! Wrapper qui expose les opérations du daemon via D-Bus
 
 use crate::dbus_interface::{DeleteFaceRequest, RegisterFaceRequest, VerifyRequest};
+use crate::dbus_signals::StreamingSignalEmitter;
 use crate::FaceAuthDaemon;
 use std::sync::Arc;
 use tokio::sync::RwLock;
 use tracing::{debug, error, info};
-use zbus::interface;
+use zbus::{interface, Connection};
 
 /// Wrapper D-Bus autour du daemon
 pub struct FaceAuthInterface {
     daemon: Arc<RwLock<FaceAuthDaemon>>,
+    signal_emitter: Option<Arc<StreamingSignalEmitter>>,
     version: String,
     storage_path: String,
 }
 
 impl FaceAuthInterface {
+    /// Créer une nouvelle interface sans émetteur de signaux (compatible arrière)
     pub fn new(daemon: FaceAuthDaemon) -> Self {
         let storage_path = daemon.config().storage_path.to_string_lossy().into_owned();
         Self {
             daemon: Arc::new(RwLock::new(daemon)),
+            signal_emitter: None,
+            version: env!("CARGO_PKG_VERSION").to_string(),
+            storage_path,
+        }
+    }
+
+    /// Créer une nouvelle interface avec émetteur de signaux D-Bus
+    pub fn new_with_connection(daemon: FaceAuthDaemon, connection: Connection) -> Self {
+        let storage_path = daemon.config().storage_path.to_string_lossy().into_owned();
+        let signal_emitter = Arc::new(StreamingSignalEmitter::new(Arc::new(connection)));
+        Self {
+            daemon: Arc::new(RwLock::new(daemon)),
+            signal_emitter: Some(signal_emitter),
             version: env!("CARGO_PKG_VERSION").to_string(),
             storage_path,
         }
@@ -197,27 +213,31 @@ impl FaceAuthInterface {
         let daemon = self.daemon.read().await;
         let camera_manager = daemon.camera_manager();
 
+        // Cloner l'émetteur de signaux pour utiliser dans la closure
+        let signal_emitter = self.signal_emitter.clone();
+
         // Capturer les frames avec callback qui émet les signaux
         let result = camera_manager
-            .start_capture_stream(num_frames, timeout_ms, |event| {
-                // Sérialiser l'événement en JSON
-                let event_json = match serde_json::to_string(&event) {
-                    Ok(j) => j,
-                    Err(e) => {
-                        error!("JSON serialize error: {}", e);
-                        return;
-                    }
-                };
+            .start_capture_stream(num_frames, timeout_ms, move |event| {
+                // Si émetteur disponible, émettre le signal D-Bus
+                if let Some(emitter) = &signal_emitter {
+                    let emitter_clone = emitter.clone();
+                    let event_clone = event.clone();
 
-                debug!(
-                    "Frame {}/{} - Émission signal D-Bus",
-                    event.frame_number + 1,
-                    event.total_frames
-                );
-
-                // En production: utiliser zbus::SignalEmitter pour émettre le signal
-                // Signal: com.linuxhello.FaceAuth.CaptureProgress(event_json)
-                info!("Signal CaptureProgress: {}", event_json);
+                    // Utiliser tokio::spawn pour ne pas bloquer la boucle de capture
+                    tokio::spawn(async move {
+                        if let Err(e) = emitter_clone.emit_capture_progress(&event_clone).await {
+                            error!("Erreur émission signal: {}", e);
+                        }
+                    });
+                } else {
+                    // Fallback si pas d'émetteur (mode test/debug)
+                    debug!(
+                        "Frame {}/{} - Pas d'émetteur de signaux",
+                        event.frame_number + 1,
+                        event.total_frames
+                    );
+                }
             })
             .await;
 
@@ -226,10 +246,27 @@ impl FaceAuthInterface {
         match result {
             Ok(_) => {
                 info!("start_capture_stream succeeded");
+
+                // Émettre le signal de fin
+                if let Some(emitter) = &self.signal_emitter {
+                    if let Err(e) = emitter.emit_capture_completed(user_id).await {
+                        error!("Erreur émission CaptureCompleted: {}", e);
+                    }
+                }
+
                 Ok("OK".to_string())
             }
             Err(e) => {
                 error!("start_capture_stream failed: {}", e);
+
+                // Émettre le signal d'erreur
+                if let Some(emitter) = &self.signal_emitter {
+                    let error_msg = format!("{}", e);
+                    if let Err(e) = emitter.emit_capture_error(user_id, &error_msg).await {
+                        error!("Erreur émission CaptureError: {}", e);
+                    }
+                }
+
                 Err(zbus::fdo::Error::Failed(e.to_string()))
             }
         }

@@ -62,12 +62,13 @@ async fn main() -> anyhow::Result<()> {
 
     // Enregistrer sur D-Bus
     info!("Enregistrement sur D-Bus...");
-    let iface = FaceAuthInterface::new(daemon);
 
     let connection = zbus::Connection::session().await.map_err(|e| {
         error!("Erreur connexion D-Bus: {}", e);
         e
     })?;
+
+    let iface = FaceAuthInterface::new_with_connection(daemon, connection.clone());
 
     connection
         .request_name("com.linuxhello.FaceAuth")
@@ -89,6 +90,7 @@ async fn main() -> anyhow::Result<()> {
     info!("✓ Service D-Bus enregistré: com.linuxhello.FaceAuth");
     info!("  Interface: /com/linuxhello/FaceAuth");
     info!("  Méthodes: register_face, verify, delete_face, list_faces, ping");
+    info!("  Signaux: CaptureProgress, CaptureCompleted, CaptureError");
 
     // Garder le daemon actif indéfiniment
     info!("Daemon prêt. Appuyez sur Ctrl+C pour arrêter.");

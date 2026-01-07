@@ -150,12 +150,13 @@ impl CameraManager {
     ///
     /// # Example
     /// ```no_run
-    /// # async {
+    /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
+    /// # let camera = hello_daemon::camera::CameraManager::new(5000);
     /// camera.start_capture_stream(30, 120000, |event| {
     ///     println!("Frame {}/{}", event.frame_number, event.total_frames);
     /// }).await?;
-    /// # Ok::<(), CameraError>(())
-    /// # };
+    /// # Ok(())
+    /// # }
     /// ```
     pub async fn start_capture_stream<F>(
         &self,
