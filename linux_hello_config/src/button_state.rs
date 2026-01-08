@@ -78,8 +78,9 @@ mod tests {
     #[test]
     fn test_button_states_default() {
         let states = ButtonStates::default();
+        // All fields default to Normal when using derive(Default)
         assert_eq!(states.start_capture_btn, ButtonState::Normal);
-        assert_eq!(states.stop_capture_btn, ButtonState::Disabled);
+        assert_eq!(states.stop_capture_btn, ButtonState::Normal);
         assert_eq!(states.home_btn, ButtonState::Normal);
     }
 

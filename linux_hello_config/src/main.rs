@@ -5,7 +5,6 @@
 //! - Configuration des paramètres d'authentification
 //! - Gestion des visages enregistrés
 
-#[allow(unused_imports)]
 use iced::widget::{Button, Column, Container, ProgressBar, Row, Text};
 use iced::{executor, Application, Command, Element, Length};
 use std::time::Instant;
@@ -16,6 +15,7 @@ mod button_builder;
 mod button_state;
 mod config;
 mod dbus_client;
+mod gui_integration_tests;
 mod performance_tests;
 mod preview;
 mod render_cache;
