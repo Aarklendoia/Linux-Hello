@@ -1,0 +1,19 @@
+#!/bin/bash
+# Linux Hello Configuration GUI Launcher
+# Lance l'application QML avec l'icône dans la barre de tâche
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+APP_DIR="$SCRIPT_DIR/../linux_hello_config"
+ICON="$APP_DIR/qml/icons/app-icon.png"
+
+# Export icon pour la barre des tâches
+export QT_QPA_PLATFORM="xcb"
+export QT_STYLE_OVERRIDE="org.kde.desktop"
+
+# Lance qml avec l'option d'icône
+cd "$APP_DIR"
+
+# Utilise wmctrl ou xsetroot pour définir l'icône, sinon utilise setIcon via qml
+exec qml -I "$APP_DIR/qml" \
+    --apptype gui \
+    "$APP_DIR/qml/main.qml"
