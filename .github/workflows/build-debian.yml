@@ -51,7 +51,7 @@ jobs:
           lintian ../*.deb || true
       
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: debian-packages
           path: |
