@@ -10,6 +10,7 @@ use zbus::Connection;
 
 /// Gestionnaire des signaux D-Bus pour le streaming
 pub struct StreamingSignalEmitter {
+    #[allow(dead_code)]
     connection: Arc<Connection>,
 }
 

@@ -6,7 +6,7 @@
 use crate::capture_stream::CaptureFrameEvent;
 use hello_camera::Frame;
 use hello_face_core::Embedding;
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::time::{Duration, SystemTime};
 use thiserror::Error;
 use tracing::{debug, info};
 

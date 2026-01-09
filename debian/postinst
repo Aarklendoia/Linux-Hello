@@ -3,32 +3,35 @@
 
 set -e
 
-# shellcheck source=/usr/share/debconf/confmodule disable=SC1091
-. /usr/share/debconf/confmodule
-
 echo "Linux Hello - Postinstallation Configuration"
 echo "=============================================="
 echo ""
 
 # Create storage directory
 STORAGE_DIR="${HOME}/.local/share/linux-hello"
-mkdir -p "$STORAGE_DIR"
-chmod 700 "$STORAGE_DIR"
+mkdir -p "$STORAGE_DIR" 2>/dev/null || true
+chmod 700 "$STORAGE_DIR" 2>/dev/null || true
 
-echo "✓ Created storage directory: $STORAGE_DIR"
+echo "✓ Daemon service installed"
 
-# Offer to configure PAM
-echo ""
-echo "PAM Configuration Options:"
-echo ""
-echo "1. Sudo authentication (RECOMMENDED FOR TESTING)"
-echo "2. KDE Screenlock"
-echo "3. Both"
-echo "4. None (manual configuration)"
-echo ""
+# Activer et lancer le daemon pour l'utilisateur qui a lancé l'installation
+TARGET_USER="${SUDO_USER}"
+if [ -z "$TARGET_USER" ]; then
+    # Si pas de SUDO_USER, on est peut-être lancé directement en root
+    # On essaie de trouver l'utilisateur principal
+    TARGET_USER=$(who | head -1 | awk '{print $1}')
+fi
 
-read -rp "Select option (1-4) [1]: " pam_option
-pam_option=${pam_option:-1}
+if [ -n "$TARGET_USER" ] && [ "$TARGET_USER" != "root" ]; then
+    echo "Enabling daemon for user: $TARGET_USER"
+    sudo -u "$TARGET_USER" systemctl --user enable hello-daemon.service 2>/dev/null || true
+    sudo -u "$TARGET_USER" systemctl --user start hello-daemon.service 2>/dev/null || true
+    echo "✓ Daemon enabled and started"
+fi
+
+# Non-interactive installation (no PAM config by default)
+# Users can configure PAM manually or re-run configuration tool
+pam_option="4"
 
 case "$pam_option" in
     1)
@@ -88,26 +91,9 @@ case "$pam_option" in
         ;;
 esac
 
-echo ""
-echo "Setup Options:"
-echo ""
-echo "1. Enable daemon autostart (systemd user service)"
-echo "2. Manual daemon startup only"
-echo ""
-
-read -rp "Select option (1-2) [1]: " daemon_option
-daemon_option=${daemon_option:-1}
-
-if [ "$daemon_option" = "1" ]; then
-    mkdir -p ~/.config/systemd/user
-    systemctl --user daemon-reload
-    systemctl --user enable hello-daemon.service 2>/dev/null || true
-    systemctl --user start hello-daemon.service 2>/dev/null || true
-    echo "✓ Daemon autostart enabled"
-else
-    echo "✓ Manual startup only"
-    echo "  Start with: hello-daemon"
-fi
+# Daemon setup is skipped during package installation (no user session available)
+# Users can enable autostart manually with: systemctl --user enable hello-daemon.service
+echo "✓ Daemon setup (manual configuration can be done via: systemctl --user enable hello-daemon.service)"
 
 echo ""
 echo "Installation Complete!"
