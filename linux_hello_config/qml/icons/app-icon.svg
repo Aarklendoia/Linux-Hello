@@ -1,66 +1,70 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
-  <!-- Arrière-plan dégradé bleu -->
   <defs>
     <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#3498db;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#2980b9;stop-opacity:1" />
+      <stop offset="0%" style="stop-color:#4A90E2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#357ABD;stop-opacity:1" />
     </linearGradient>
     <linearGradient id="faceGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#e8f4f8;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#d0e8f0;stop-opacity:1" />
+      <stop offset="0%" style="stop-color:#F0F8FF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#E0EFF8;stop-opacity:1" />
     </linearGradient>
+    <radialGradient id="glowGradient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:0.4" />
+      <stop offset="100%" style="stop-color:#FFFFFF;stop-opacity:0" />
+    </radialGradient>
   </defs>
   
-  <!-- Arrière-plan -->
-  <rect width="256" height="256" fill="url(#bgGradient)" rx="40"/>
+  <!-- Arrière-plan arrondi -->
+  <rect width="256" height="256" fill="url(#bgGradient)" rx="45" ry="45"/>
   
-  <!-- Visage stylisé (cercle) -->
-  <circle cx="128" cy="110" r="65" fill="url(#faceGradient)" stroke="#2980b9" stroke-width="2"/>
+  <!-- Visage stylisé principal -->
+  <circle cx="128" cy="100" r="70" fill="url(#faceGradient)" stroke="#357ABD" stroke-width="3"/>
   
-  <!-- Yeux -->
-  <circle cx="105" cy="95" r="8" fill="#2c3e50"/>
-  <circle cx="151" cy="95" r="8" fill="#2c3e50"/>
+  <!-- Yeux gauche -->
+  <ellipse cx="105" cy="85" rx="10" ry="12" fill="#1A1A2E"/>
+  <!-- Yeux droit -->
+  <ellipse cx="151" cy="85" rx="10" ry="12" fill="#1A1A2E"/>
   
-  <!-- Reflet dans les yeux (biométrique) -->
-  <circle cx="107" cy="93" r="3" fill="#ffffff"/>
-  <circle cx="153" cy="93" r="3" fill="#ffffff"/>
+  <!-- Reflets brillants dans les yeux -->
+  <ellipse cx="108" cy="82" rx="4" ry="5" fill="#FFFFFF"/>
+  <ellipse cx="154" cy="82" rx="4" ry="5" fill="#FFFFFF"/>
   
   <!-- Nez -->
-  <path d="M 128 100 L 125 115" stroke="#2c3e50" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M 128 95 L 128 115" stroke="#333333" stroke-width="2.5" fill="none" stroke-linecap="round"/>
   
-  <!-- Sourire (authentification réussie) -->
-  <path d="M 110 125 Q 128 140 146 125" stroke="#27ae60" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <!-- Sourire énergique (vert pour sécurité/succès) -->
+  <path d="M 108 125 Q 128 145 148 125" stroke="#3FBF5C" stroke-width="4" fill="none" stroke-linecap="round"/>
   
-  <!-- Points de reconnaissance faciale (réseau biométrique) -->
-  <g stroke="#3498db" stroke-width="1.5" fill="none" opacity="0.7">
-    <!-- Points autour du visage -->
-    <circle cx="90" cy="110" r="3"/>
-    <circle cx="166" cy="110" r="3"/>
-    <circle cx="110" cy="160" r="3"/>
-    <circle cx="146" cy="160" r="3"/>
-    <!-- Lignes de connexion -->
-    <line x1="90" y1="110" x2="128" y2="110"/>
-    <line x1="166" y1="110" x2="128" y2="110"/>
-    <line x1="110" y1="160" x2="128" y2="110"/>
-    <line x1="146" y1="160" x2="128" y2="110"/>
+  <!-- Points de reconnaissance faciale biométrique -->
+  <g fill="#4A90E2">
+    <circle cx="85" cy="100" r="4"/>
+    <circle cx="171" cy="100" r="4"/>
+    <circle cx="105" cy="155" r="4"/>
+    <circle cx="151" cy="155" r="4"/>
   </g>
   
-  <!-- Cadenas (sécurité) au bas de l'icône -->
-  <g transform="translate(128, 175)">
+  <!-- Lignes de connexion réseau biométrique -->
+  <g stroke="#4A90E2" stroke-width="1.5" fill="none" stroke-dasharray="4,2" opacity="0.8">
+    <line x1="85" y1="100" x2="128" y2="100"/>
+    <line x1="171" y1="100" x2="128" y2="100"/>
+    <line x1="105" y1="155" x2="128" y2="100"/>
+    <line x1="151" y1="155" x2="128" y2="100"/>
+  </g>
+  
+  <!-- Cadenas sécurisé en bas -->
+  <g transform="translate(128, 185)">
     <!-- Corps du cadenas -->
-    <rect x="-15" y="-5" width="30" height="25" rx="3" fill="none" stroke="#27ae60" stroke-width="2"/>
+    <rect x="-16" y="-4" width="32" height="28" rx="4" fill="none" stroke="#3FBF5C" stroke-width="2.5"/>
     <!-- Arche du cadenas -->
-    <path d="M -10 -5 Q -10 -25 0 -25 Q 10 -25 10 -5" fill="none" stroke="#27ae60" stroke-width="2" stroke-linecap="round"/>
-    <!-- Point de verrouillage -->
-    <circle cx="0" cy="8" r="3" fill="#27ae60"/>
+    <path d="M -11 -4 Q -11 -22 0 -22 Q 11 -22 11 -4" fill="none" stroke="#3FBF5C" stroke-width="2.5" stroke-linecap="round"/>
+    <!-- Point de verrouillage rempli -->
+    <circle cx="0" cy="10" r="3.5" fill="#3FBF5C"/>
   </g>
   
-  <!-- Halo lumineux (authentification active) -->
-  <circle cx="128" cy="110" r="75" fill="none" stroke="#ffffff" stroke-width="1" opacity="0.3"/>
+  <!-- Halo lumineux pour effet d'authenticité -->
+  <circle cx="128" cy="100" r="78" fill="url(#glowGradient)"/>
   
-  <!-- Texte minimal -->
-  <text x="128" y="245" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#ffffff" opacity="0.9">
-    LINUX HELLO
-  </text>
+  <!-- Contour de sécurité subtil -->
+  <circle cx="128" cy="100" r="75" fill="none" stroke="#3FBF5C" stroke-width="0.5" opacity="0.3"/>
 </svg>

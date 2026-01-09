@@ -26,11 +26,17 @@ test-output/
 *.log
 # Debian packaging
 debian/tmp/
-debian/linux-hello*/
+debian/.debhelper/
+debian/libpam-linux-hello*/
+debian/linux-hello-daemon/
+debian/linux-hello-gui/
+debian/linux-hello-tools/
+debian/linux-hello/
 debian/*.substvars
 debian/*.debhelper
 debian/files
 debian/.debhelper.log
+debian/debhelper-build-stamp
 ../*.deb
 ../*.buildinfo
 ../*.changes
