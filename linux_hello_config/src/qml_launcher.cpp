@@ -4,10 +4,18 @@
 #include <QStandardPaths>
 #include <QString>
 #include <QDir>
+#include <QProcessEnvironment>
 
 int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
+
+    // Configure environment variables for Qt/QML runtime
+    qputenv("QML_XHR_ALLOW_FILE_READ", "1");
+    qputenv("QT_QPA_PLATFORMTHEME", "kde");
+    qputenv("QT_QUICK_CONTROLS_STYLE", "org.kde.desktop");
+    qputenv("QT_STYLE_OVERRIDE", "org.kde.desktop");
+    qputenv("QML_BIND_IGNORE", "1");
 
     // Définir l'icône de la barre de titre et du système
     app.setWindowIcon(QIcon("/usr/share/icons/hicolor/scalable/apps/linux-hello.svg"));
