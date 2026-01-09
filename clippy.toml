@@ -3,8 +3,4 @@
 # Warn about undocumented public items
 missing-docs-in-crate-items = true
 
-# Enforce documentation on pub items
-doc-markdown = true
 
-# Complexity warnings
-cognitive-complexity-threshold = 30
