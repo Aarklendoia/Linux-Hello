@@ -38,9 +38,7 @@ jobs:
             qml6-module-qtcore \
             qml6-module-qtquick \
             qml6-module-qtquick-layouts \
-            qml6-module-qtquick-controls \
-            kirigami-design-system \
-            libkf6kirigami-dev
+            qml6-module-qtquick-controls
       
       - name: Build Debian packages
         run: |
