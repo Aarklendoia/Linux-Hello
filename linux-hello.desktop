@@ -8,6 +8,15 @@ Exec=linux-hello-config
 Categories=System;Settings;Security;
 Keywords=face;recognition;authentication;biometric;
 
+# Window properties
+StartupNotify=true
+Terminal=false
+NotShowIn=
+
+# X11 specific
+X-KDE-StartupNotify=true
+X-KDE-Protocols=file
+
 # Translations
 Name[fr]=Linux Hello
 Comment[fr]=Configuration de l'Authentification Biométrique

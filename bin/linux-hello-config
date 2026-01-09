@@ -20,8 +20,12 @@ fi
 export QT_QPA_PLATFORM="xcb"
 export QT_STYLE_OVERRIDE="org.kde.desktop"
 export QML_XHR_ALLOW_FILE_READ="1"
+# Set application metadata for window manager and taskbar
+export QT_QPA_PLATFORMTHEME="kde"
+export QT_APPLICATION_DISPLAY_NAME="Linux Hello"
 
-# Launch QML application
+# Launch QML application with proper window properties
 exec qml -I "$APP_DIR/qml" \
     --apptype gui \
+    -WindowTitle "Linux Hello - Configuration" \
     "$APP_DIR/qml/main.qml"
