@@ -10,6 +10,7 @@ Keywords=face;recognition;authentication;biometric;
 
 # Window properties
 StartupNotify=true
+StartupWMClass=qml6
 Terminal=false
 NotShowIn=
 

@@ -1,8 +1,8 @@
 # GUI Configuration Tool and Assets for linux-hello-gui package
 # Format: source destination
 
-# GUI Configuration Tool
-bin/linux-hello-config usr/bin
+# GUI launcher binary (installed by debian/rules from CMake build)
+usr/bin/linux-hello-config usr/bin
 
 # GUI QML Files
 linux_hello_config/qml/main.qml usr/share/linux-hello/qml

@@ -18,6 +18,12 @@ Cargo.lock
 *.o
 *.dylib
 
+# CMake build directory (Qt6 GUI launcher)
+linux_hello_config/src/build/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+
 # Test outputs
 test-output/
 *.profdata

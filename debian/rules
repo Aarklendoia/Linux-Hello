@@ -14,6 +14,8 @@ override_dh_auto_clean:
 
 override_dh_auto_build:
 	cargo build --release --verbose
+	# Build Qt6 GUI launcher
+	cd $(CURDIR)/linux_hello_config/src && mkdir -p build && cd build && cmake .. && make
 
 override_dh_auto_test:
 	# Skip tests (they require specific hardware/D-Bus setup)
@@ -54,7 +56,9 @@ override_dh_auto_install:
 	mkdir -p $(CURDIR)/debian/tmp/usr/share/applications
 	mkdir -p $(CURDIR)/debian/tmp/usr/share/doc/linux-hello-gui
 	
-	cp $(CURDIR)/bin/linux-hello-config $(CURDIR)/debian/tmp/usr/bin/
+	# Install GUI launcher
+	mkdir -p $(CURDIR)/debian/tmp/usr/bin
+	cp $(CURDIR)/linux_hello_config/src/build/linux-hello-config-launcher $(CURDIR)/debian/tmp/usr/bin/linux-hello-config
 	chmod +x $(CURDIR)/debian/tmp/usr/bin/linux-hello-config
 	
 	cp $(CURDIR)/linux_hello_config/qml/*.qml $(CURDIR)/debian/tmp/usr/share/linux-hello/qml/
