@@ -2,15 +2,11 @@ name: Build Debian Packages
 
 on:
   push:
-    branches:
-      - main
-      - develop
-    tags:
-      - 'v*'
+    branches: [ main, develop ]
+    tags: [ 'v*' ]
   pull_request:
-    branches:
-      - main
-      - develop
+    branches: [ main, develop ]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -28,30 +24,50 @@ jobs:
           apt-get install -y \
             build-essential \
             debhelper \
+            devscripts \
             quilt \
+            lintian \
             rustc \
             cargo \
             libssl-dev \
             libpam0g-dev \
             pkg-config \
-            dh-cargo
+            qt6-base-dev \
+            qml6-module-qtcore \
+            qml6-module-qtquick \
+            qml6-module-qtquick-layouts \
+            qml6-module-qtquick-controls \
+            kirigami-design-system \
+            libkf6kirigami-dev
       
       - name: Build Debian packages
         run: |
+          cd $GITHUB_WORKSPACE
           dpkg-buildpackage -us -uc -b
+      
+      - name: Run lintian checks
+        run: |
+          cd $GITHUB_WORKSPACE
+          lintian ../*.deb || true
       
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: debian-packages
-          path: ../*.deb
+          path: |
+            ../*.deb
+            ../*.buildinfo
+            ../*.changes
           retention-days: 30
       
       - name: Create Release (on tag)
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v1
         with:
-          files: ../*.deb
+          files: |
+            ../*.deb
+            ../*.buildinfo
+            ../*.changes
           draft: false
           prerelease: false
         env:

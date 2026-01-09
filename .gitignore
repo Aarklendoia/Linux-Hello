@@ -47,14 +47,15 @@ debian/debhelper-build-stamp
 *.deb
 .debhelper-build-stamp
 
-# Debian patches and quilt
-debian/patches/.pc/
-.pc/
+# GitHub workflows artifacts
+*.buildinfo
+*.changes
+*.dsc
+*.tar.*
+../*.deb
+../*.buildinfo
+../*.changes
 
-# Generated source tarball
-*.tar.gz
-*.tar.xz
-
-# Distribution files
-dist/
-release/
+# Documentation
+target/doc/
+public/
