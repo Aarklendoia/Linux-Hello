@@ -27,19 +27,29 @@ jobs:
             devscripts \
             quilt \
             lintian \
-            rustc \
-            cargo \
             libssl-dev \
             libpam0g-dev \
+            libdbus-1-dev \
             pkg-config \
             qt6-base-dev \
+            qt6-tools-dev \
             qml6-module-qtcore \
             qml6-module-qtquick \
             qml6-module-qtquick-layouts \
-            qml6-module-qtquick-controls
+            qml6-module-qtquick-controls \
+            libqt6gui6 \
+            libqt6core6
+      
+      - name: Install Rust
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
+          . "$HOME/.cargo/env"
+          rustc --version
+          cargo --version
       
       - name: Build Debian packages
         run: |
+          . "$HOME/.cargo/env"
           cd $GITHUB_WORKSPACE
           dpkg-buildpackage -us -uc -b
       
