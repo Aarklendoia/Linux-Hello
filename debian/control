@@ -4,10 +4,15 @@ Priority: optional
 Maintainer: Linux Hello Team <dev@linuxhello.local>
 Build-Depends: 
   debhelper-compat (= 13),
-  rustc (>= 1.70),
-  cargo,
+  libssl-dev,
+  libpam0g-dev,
   libdbus-1-dev,
-  libpam0g-dev
+  pkg-config,
+  qt6-base-dev,
+  qml6-module-qtcore,
+  qml6-module-qtquick,
+  qml6-module-qtquick-layouts,
+  qml6-module-qtquick-controls
 Standards-Version: 4.6.1
 Homepage: https://github.com/linuxhello/face-auth
 Vcs-Git: https://github.com/linuxhello/face-auth.git
