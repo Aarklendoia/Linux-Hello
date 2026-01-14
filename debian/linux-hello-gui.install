@@ -1,5 +1,5 @@
 # GUI launcher binary
-target/release/linux-hello-config usr/bin
+target/release/linux_hello_config usr/bin
 
 # Desktop entry
 linux-hello.desktop usr/share/applications
