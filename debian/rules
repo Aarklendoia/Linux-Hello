@@ -4,7 +4,6 @@
 export DH_VERBOSE=1
 export CARGO_HOME=$(CURDIR)/target/cargo
 export RUSTUP_TOOLCHAIN=stable
-export PATH=$(HOME)/.cargo/bin:$(PATH)
 
 %:
 	dh $@
